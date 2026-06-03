@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 interface CalculatorProduct {
   id: string;
@@ -23,7 +22,7 @@ const calculatorProducts: CalculatorProduct[] = [
     recommendedPrice: 23.55,
     minPrice: 12.00,
     maxPrice: 45.00,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80",
+    image: "/HERO-3-TRANSPARENT.png",
   },
   {
     id: "calc-2",
@@ -32,7 +31,7 @@ const calculatorProducts: CalculatorProduct[] = [
     recommendedPrice: 15.00,
     minPrice: 6.00,
     maxPrice: 30.00,
-    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80",
+    image: "/MUG-TRANSPARENT.png",
   },
   {
     id: "calc-3",
@@ -41,7 +40,7 @@ const calculatorProducts: CalculatorProduct[] = [
     recommendedPrice: 49.95,
     minPrice: 26.00,
     maxPrice: 90.00,
-    image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80",
+    image: "/HOODIE-TRANSPARENT.png",
   },
   {
     id: "calc-4",
@@ -54,92 +53,131 @@ const calculatorProducts: CalculatorProduct[] = [
   },
 ];
 
+const USD_TO_MAD = 10;
+
 export function ProfitCalculator() {
   const [activeProductIndex, setActiveProductIndex] = useState(0);
   const activeProduct = calculatorProducts[activeProductIndex];
 
-  // Pricing & volume states
-  const [sellPrice, setSellPrice] = useState(activeProduct.recommendedPrice);
+  // Pricing & Currency states [1]
+  const [currency, setCurrency] = useState<"USD" | "MAD">("MAD"); // Defaults to MAD for local Moroccan users [1]
+  const [sellPriceUSD, setSellPriceUSD] = useState(activeProduct.recommendedPrice);
   const [salesPerDay, setSalesPerDay] = useState(5);
 
-  // Sync pricing configuration whenever the active product changes
+  // Sync pricing whenever the active product changes [1]
   useEffect(() => {
-    setTimeout(() =>     setSellPrice(activeProduct.recommendedPrice), 0); // Reset sales per day with a slight delay for UX smoothness
+    setTimeout(() => {
+      setSellPriceUSD(activeProduct.recommendedPrice);
+    }, 300); // Small delay to allow for product image transition
   }, [activeProduct]);
 
-  const handleNextProduct = () => {
-    setActiveProductIndex((prev) => (prev + 1) % calculatorProducts.length);
+  const convertFromUSD = (usdValue: number) => {
+    return currency === "MAD" ? usdValue * USD_TO_MAD : usdValue;
   };
 
-  const handlePrevProduct = () => {
-    setActiveProductIndex((prev) => (prev - 1 + calculatorProducts.length) % calculatorProducts.length);
+  const convertToUSD = (localValue: number) => {
+    return currency === "MAD" ? localValue / USD_TO_MAD : localValue;
   };
 
-  // Math: Profit Per Sale * Daily Sales * Days in a Year
-  const profitPerSale = Math.max(0, sellPrice - activeProduct.basePrice);
-  const annualProfit = profitPerSale * salesPerDay * 365;
+  const formatCurrency = (valueInUSD: number) => {
+    const localValue = convertFromUSD(valueInUSD);
+    if (currency === "MAD") {
+      return `${localValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} DH`;
+    }
+    return valueInUSD.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  };
+
+  const profitPerSaleUSD = Math.max(0, sellPriceUSD - activeProduct.basePrice);
+  const annualProfitUSD = profitPerSaleUSD * salesPerDay * 365;
 
   return (
     <section className="black-bg py-20 md:py-28 text-white relative overflow-hidden">
       
-      {/* Background accents */}
+      {/* Background radial highlights */}
       <div className="absolute top-10 left-10 w-96 h-96 rounded-full bg-[#e9204f]/5 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-[#e9204f]/5 blur-[100px] pointer-events-none" />
 
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12">
+      <div className="max-w-[1300px] mx-auto px-6 md:px-12">
         
-        {/* HEADER */}
-        <div className="text-center mb-16">
-          <motion.h2
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-5xl font-black tracking-tight mb-4"
-          >
-            Your passion really can pay
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.15 }}
-            className="text-neutral-400 font-medium text-sm md:text-base"
-          >
-            See how much you could make
-          </motion.p>
+        {/* HEADER & CURRENCY SWITCHER */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-16 border-b border-white/5 pb-10">
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-3">
+              Your passion really can pay
+            </h2>
+            <p className="text-neutral-400 font-medium text-sm md:text-base">
+              Set your retail prices and calculate your potential store margins [1].
+            </p>
+          </div>
+
+          {/* Minimal Currency Switcher Pill [1] */}
+          <div className="inline-flex rounded-full bg-white/5 p-1 border border-white/10 backdrop-blur-sm select-none">
+            <button
+              onClick={() => setCurrency("MAD")}
+              className={`relative rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
+                currency === "MAD" ? "text-[#1b1b1b]" : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              {currency === "MAD" && (
+                <motion.span
+                  layoutId="calcCurrencyBg"
+                  className="absolute inset-0 bg-white rounded-full"
+                  transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                />
+              )}
+              <span className="relative z-10">MAD (DH)</span>
+            </button>
+            <button
+              onClick={() => setCurrency("USD")}
+              className={`relative rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
+                currency === "USD" ? "text-[#1b1b1b]" : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              {currency === "USD" && (
+                <motion.span
+                  layoutId="calcCurrencyBg"
+                  className="absolute inset-0 bg-white rounded-full"
+                  transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                />
+              )}
+              <span className="relative z-10">USD ($)</span>
+            </button>
+          </div>
         </div>
 
-        {/* CALCULATOR INTERFACE */}
-        <div className="bg-white rounded-[2.5rem] p-8 md:p-12 lg:p-16 text-black grid grid-cols-1 lg:grid-cols-12 gap-12 items-center shadow-xl">
+        {/* GLASSMORPHIC CALCULATOR CARD [1] */}
+        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-8 md:p-12 lg:p-14 backdrop-blur-md grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* LEFT: Product Mockup & Selector */}
-          <div className="lg:col-span-6 flex flex-col items-center">
+          {/* LEFT: Product Selection & Image Frame */}
+          <div className="lg:col-span-6 flex flex-col items-center w-full">
             
-            {/* Product Cycling Menu */}
-            <div className="flex items-center gap-6 mb-8 w-full justify-between max-w-[340px]">
-              <button
-                onClick={handlePrevProduct}
-                className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 hover:border-neutral-300 transition cursor-pointer"
-                aria-label="Previous product"
-              >
-                <IoChevronBack size={18} className="text-neutral-600" />
-              </button>
-
-              <h3 className="text-xl font-black tracking-tight text-neutral-800 text-center flex-1">
-                {activeProduct.name}
-              </h3>
-
-              <button
-                onClick={handleNextProduct}
-                className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 hover:border-neutral-300 transition cursor-pointer"
-                aria-label="Next product"
-              >
-                <IoChevronForward size={18} className="text-neutral-600" />
-              </button>
+            {/* Minimal Underline Text Tabs [1] */}
+            <div className="flex flex-wrap justify-center gap-6 mb-10 border-b border-white/5 pb-4 w-full">
+              {calculatorProducts.map((prod, idx) => (
+                <button
+                  key={prod.id}
+                  onClick={() => setActiveProductIndex(idx)}
+                  className={`relative pb-3 text-xs md:text-sm font-black uppercase tracking-widest transition cursor-pointer ${
+                    activeProductIndex === idx ? "text-[#e9204f]" : "text-neutral-500 hover:text-neutral-300"
+                  }`}
+                >
+                  {prod.name}
+                  {activeProductIndex === idx && (
+                    <motion.span
+                      layoutId="calcActiveTabLine"
+                      className="absolute bottom-0 left-0 w-full h-[2px] bg-[#e9204f]"
+                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                    />
+                  )}
+                </button>
+              ))}
             </div>
 
-            {/* Product Image Frame */}
-            <div className="relative w-full aspect-square max-w-[360px] bg-neutral-50 rounded-3xl border border-neutral-100 overflow-hidden shadow-inner flex items-center justify-center">
+            {/* Glowing, transparent product image container [1] */}
+            <div className="relative w-full aspect-square max-w-[340px] flex items-center justify-center p-6">
+              {/* Inner ambient glow */}
+              <div className="absolute inset-4 rounded-full bg-white/[0.02] blur-xl" />
+              
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeProduct.id}
@@ -154,7 +192,7 @@ export function ProfitCalculator() {
                     alt={activeProduct.name}
                     fill
                     sizes="(max-width: 1024px) 100vw, 40vw"
-                    className="object-cover"
+                    className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.15)]"
                   />
                 </motion.div>
               </AnimatePresence>
@@ -162,106 +200,108 @@ export function ProfitCalculator() {
 
           </div>
 
-          {/* RIGHT: Slider Metrics & Calculation [1] */}
+          {/* RIGHT: Metric Sliders & Dynamic Output */}
           <div className="lg:col-span-6 flex flex-col gap-8">
             
-            {/* Row 1: Flat Cost (Disabled metric) [1] */}
-            <div className="flex justify-between items-center bg-neutral-50 p-4 rounded-2xl border border-neutral-100">
-              <span className="text-sm font-bold text-neutral-500">You buy for</span>
-              <div className="text-right">
-                <span className="text-[10px] font-bold text-neutral-400 mr-1.5 uppercase">Starting from</span>
-                <span className="text-base font-black text-neutral-800">${activeProduct.basePrice.toFixed(2)}*</span>
-              </div>
-            </div>
-
-            {/* Row 2: Sell Price Slider [1] */}
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-neutral-500">You sell for</span>
-                <div className="flex items-center gap-1.5 border border-neutral-200 rounded-lg px-3 py-1.5 bg-neutral-50">
-                  <span className="text-xs font-bold text-neutral-400">$</span>
-                  <input
-                    type="number"
-                    value={sellPrice}
-                    min={activeProduct.minPrice}
-                    max={activeProduct.maxPrice}
-                    step="0.5"
-                    onChange={(e) => setSellPrice(Math.max(activeProduct.basePrice, Number(e.target.value)))}
-                    className="w-16 bg-transparent text-sm font-extrabold outline-none text-neutral-800 text-right"
-                  />
+            {/* Sliders Area (Removed nested cards, designed with clean open layouts) [1] */}
+            <div className="flex flex-col gap-6">
+              
+              {/* Sell Price Slider [1] */}
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-end">
+                  <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">You sell for</span>
+                  <div className="flex items-center gap-1 border-b border-white/15 pb-0.5 focus-within:border-[#e9204f]/60 transition">
+                    <input
+                      type="number"
+                      value={Math.round(convertFromUSD(sellPriceUSD))}
+                      min={Math.round(convertFromUSD(activeProduct.minPrice))}
+                      max={Math.round(convertFromUSD(activeProduct.maxPrice))}
+                      step="1"
+                      onChange={(e) => {
+                        const localVal = Number(e.target.value);
+                        setSellPriceUSD(Math.max(activeProduct.basePrice, convertToUSD(localVal)));
+                      }}
+                      className="w-16 bg-transparent text-right font-black outline-none text-white text-sm pr-1"
+                    />
+                    <span className="text-[10px] font-black text-neutral-500 uppercase">{currency === "MAD" ? "DH" : "USD"}</span>
+                  </div>
                 </div>
+                <input
+                  type="range"
+                  min={activeProduct.minPrice}
+                  max={activeProduct.maxPrice}
+                  step="0.10"
+                  value={sellPriceUSD}
+                  onChange={(e) => setSellPriceUSD(Number(e.target.value))}
+                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#e9204f]"
+                />
+                <span className="text-[9px] font-extrabold tracking-wide uppercase text-neutral-500">
+                  Recommended retail: {formatCurrency(activeProduct.recommendedPrice)}
+                </span>
               </div>
-              <input
-                type="range"
-                min={activeProduct.minPrice}
-                max={activeProduct.maxPrice}
-                step="0.10"
-                value={sellPrice}
-                onChange={(e) => setSellPrice(Number(e.target.value))}
-                className="w-full h-1.5 bg-neutral-100 rounded-lg appearance-none cursor-pointer accent-[#e9204f]"
-              />
-              <span className="text-[10px] font-black tracking-wide uppercase text-[#e9204f] mt-1 block">
-                Recommended Price: ${activeProduct.recommendedPrice.toFixed(2)}
-              </span>
-            </div>
 
-            {/* Row 3: Volume Slider [1] */}
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-neutral-500">Sales per day</span>
-                <div className="border border-neutral-200 rounded-lg px-4 py-1.5 bg-neutral-50">
-                  <input
-                    type="number"
-                    value={salesPerDay}
-                    min="1"
-                    max="100"
-                    onChange={(e) => setSalesPerDay(Math.max(1, Number(e.target.value)))}
-                    className="w-10 bg-transparent text-sm font-extrabold outline-none text-neutral-800 text-right"
-                  />
+              {/* Volume Slider [1] */}
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-end">
+                  <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">Sales per day</span>
+                  <div className="border-b border-white/15 pb-0.5 focus-within:border-[#e9204f]/60 transition">
+                    <input
+                      type="number"
+                      value={salesPerDay}
+                      min="1"
+                      max="100"
+                      onChange={(e) => setSalesPerDay(Math.max(1, Number(e.target.value)))}
+                      className="w-10 bg-transparent text-right font-black outline-none text-white text-sm"
+                    />
+                  </div>
                 </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  value={salesPerDay}
+                  onChange={(e) => setSalesPerDay(Number(e.target.value))}
+                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#e9204f]"
+                />
               </div>
-              <input
-                type="range"
-                min="1"
-                max="100"
-                value={salesPerDay}
-                onChange={(e) => setSalesPerDay(Number(e.target.value))}
-                className="w-full h-1.5 bg-neutral-100 rounded-lg appearance-none cursor-pointer accent-[#e9204f]"
-              />
+
             </div>
 
-            {/* Dividers */}
-            <div className="h-[1px] bg-neutral-100 w-full" />
+            {/* Flat Cost & Margins Inline Status Strip [1] */}
+            <div className="flex flex-wrap gap-4 text-xs font-bold text-neutral-500 border-t border-white/5 pt-6 justify-between items-center">
+              <div className="flex gap-2 items-center">
+                <span className="uppercase tracking-widest text-[9px] font-black text-neutral-500">Cost:</span>
+                <span className="text-neutral-300 font-extrabold">{formatCurrency(activeProduct.basePrice)}</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="uppercase tracking-widest text-[9px] font-black text-neutral-500">Your margin:</span>
+                <span className="text-emerald-500 font-extrabold">+{formatCurrency(profitPerSaleUSD)} /item</span>
+              </div>
+            </div>
 
-            {/* Calculation Output [1] */}
-            <div className="flex flex-col items-center sm:items-start leading-tight">
-              <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">
+            {/* Dynamic Profit Output (Unboxed, bold hero sizing) [1] */}
+            <div className="flex flex-col leading-none mt-2">
+              <span className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-2.5">
                 Your approximate annual profit
               </span>
               <AnimatePresence mode="wait">
                 <motion.span
-                  key={annualProfit}
-                  initial={{ scale: 0.97 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                  className="text-3xl md:text-5xl font-black tracking-tight text-neutral-900"
+                  key={`${currency}-${annualProfitUSD}`}
+                  initial={{ scale: 0.98, opacity: 0.8 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 14 }}
+                  className="text-4xl md:text-6xl font-black tracking-tight text-white"
                 >
-                  {annualProfit.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
+                  {formatCurrency(annualProfitUSD)}
                 </motion.span>
               </AnimatePresence>
             </div>
 
-            {/* Action CTA & Fine print disclaimer */}
-            <div className="flex flex-col gap-3 mt-2">
-              <button className="primary-bg cursor-pointer w-full py-4 rounded-2xl font-bold text-sm shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition duration-150 text-center">
+            {/* Action Button */}
+            <div className="mt-2">
+              <button className="primary-bg cursor-pointer w-full py-4 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition duration-150 text-center">
                 Start selling
               </button>
-              <p className="text-[10px] text-neutral-400 font-medium leading-relaxed">
-                *This estimated value includes general print placement on the product canvas. Extra placements, shipping fees, regional sales taxes, or custom integrations are recalculated inside your catalog panel.
-              </p>
             </div>
 
           </div>

@@ -1,3 +1,4 @@
+import { DesignSlider } from "@/Components/LandingPage/DesignSlider";
 import { Footer } from "@/Components/LandingPage/Footer";
 import { HeroSection } from "@/Components/LandingPage/HeroSection";
 import { ProductGrid } from "@/Components/LandingPage/ProductGrid";
@@ -12,6 +13,7 @@ export default function Home() {
     <div className="w-full">
         <PublicHeader />
         <HeroSection />
+        <DesignSlider />
         <StepsSection />
         <ProductGrid />
         <ReviewsSection />
