@@ -44,7 +44,7 @@ export const useProductStore = create<ProductState>()(
           .on(
             "postgres_changes",
             { event: "*", schema: "public", table: "products" },
-            async (payload) => {
+            async (payload: any) => {
               const currentProducts = get().products;
               
               if (payload.eventType === "INSERT") {
