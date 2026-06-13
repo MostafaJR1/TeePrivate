@@ -18,8 +18,8 @@ const supabase = createClient()
 
 // Print area boundaries (based on visual guide in canvas)
 const PRINT_AREA = {
-  x: 120,      // left-1/2 center at 220, with w-[200px] = 100px from center
-  y: 140,      // top-[34%] of 520px = ~177px, adjusted for h-[210px]
+  x: 120,      // left edge of print area
+  y: 155,      // top edge adjusted for accurate positioning
   width: 200,
   height: 210,
 }
@@ -273,11 +273,25 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
 
             {/* Print Area Guide */}
             <div className={cn(
-              "pointer-events-none absolute left-1/2 top-[34%] h-[210px] w-[200px] -translate-x-1/2 rounded-md transition-colors",
+              "pointer-events-none absolute left-1/2 top-[30%] h-[210px] w-[200px] -translate-x-1/2 rounded-md transition-colors",
               elementsOutOfBounds.length > 0 
                 ? "border-2 border-red-500 shadow-lg shadow-red-500/30 bg-red-500/5" 
                 : "border border-dashed border-[#e9204f]/35"
             )} />
+
+            {/* Error Message */}
+            {elementsOutOfBounds.length > 0 && (
+              <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-50">
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-3 backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-red-300">
+                    {elementsOutOfBounds.length} element{elementsOutOfBounds.length !== 1 ? 's' : ''} outside print area
+                  </p>
+                  <p className="text-xs text-red-200/70 mt-1">
+                    Move all designs inside the red border
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="absolute inset-0 overflow-hidden rounded-2xl">
               {elements.map((el) => (
