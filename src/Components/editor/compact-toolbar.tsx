@@ -33,36 +33,34 @@ interface CompactToolbarProps {
 
 export function CompactToolbar({ activeTool, onToolChange }: CompactToolbarProps) {
   return (
-    <div className="absolute left-6 bottom-6 z-30 rounded-xl border border-white/10 bg-[#0a0a0a]/60 p-2 backdrop-blur-xl">
-      {/* Main tools */}
-      <div className="flex items-center gap-2">
-        {TOOLS.map((tool) => {
-          const Icon = tool.icon
-          const isActive = activeTool === tool.id
-          
-          return (
-            <button
-              key={tool.id}
-              onClick={() => onToolChange(tool.id)}
-              title={`${tool.label} (${tool.shortcut})`}
-              className={cn(
-                "group relative p-2 rounded-lg transition-all duration-200",
-                isActive
-                  ? "bg-[#e9204f] text-white shadow-lg shadow-[#e9204f]/50"
-                  : "text-neutral-400 hover:text-white hover:bg-white/10",
-              )}
-            >
-              <Icon className={cn(
-                "size-5",
-                isActive && "drop-shadow-[0_0_8px_rgba(233,32,79,0.4)]"
-              )} />
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
-                {tool.label}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+    <div className="absolute left-6 top-1/2 -translate-y-1/2 z-30 rounded-xl border border-white/10 bg-[#0a0a0a]/60 p-2 backdrop-blur-xl flex flex-col gap-1">
+      {/* Main tools - vertical layout */}
+      {TOOLS.map((tool) => {
+        const Icon = tool.icon
+        const isActive = activeTool === tool.id
+        
+        return (
+          <button
+            key={tool.id}
+            onClick={() => onToolChange(tool.id)}
+            title={`${tool.label} (${tool.shortcut})`}
+            className={cn(
+              "group relative p-2 rounded-lg transition-all duration-200",
+              isActive
+                ? "bg-[#e9204f] text-white shadow-lg shadow-[#e9204f]/50"
+                : "text-neutral-400 hover:text-white hover:bg-white/10",
+            )}
+          >
+            <Icon className={cn(
+              "size-5",
+              isActive && "drop-shadow-[0_0_8px_rgba(233,32,79,0.4)]"
+            )} />
+            <span className="absolute left-14 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
+              {tool.label}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -16,6 +16,14 @@ import { ShapeSelectorModal } from "./shape-selector-modal"
 
 const supabase = createClient()
 
+// Print area boundaries (based on visual guide in canvas)
+const PRINT_AREA = {
+  x: 120,      // left-1/2 center at 220, with w-[200px] = 100px from center
+  y: 140,      // top-[34%] of 520px = ~177px, adjusted for h-[210px]
+  width: 200,
+  height: 210,
+}
+
 interface CanvasProps {
   elements: DesignElement[]
   selectedId: string | null
@@ -53,6 +61,18 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
   const [showImageSelector, setShowImageSelector] = useState(false)
   const [showShapeSelector, setShowShapeSelector] = useState(false)
   const [imageReplaceTargetId, setImageReplaceTargetId] = useState<string | null>(null)
+
+  // Check if an element is out of bounds
+  const isOutOfBounds = (el: DesignElement): boolean => {
+    return (
+      el.x < PRINT_AREA.x ||
+      el.y < PRINT_AREA.y ||
+      el.x + el.width > PRINT_AREA.x + PRINT_AREA.width ||
+      el.y + el.height > PRINT_AREA.y + PRINT_AREA.height
+    )
+  }
+
+  const elementsOutOfBounds = elements.filter(isOutOfBounds)
 
   useEffect(() => {
     if (activeTool === "image") setShowImageSelector(true)
@@ -251,7 +271,13 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
               crossOrigin="anonymous"
             />
 
-            <div className="pointer-events-none absolute left-1/2 top-[34%] h-[210px] w-[200px] -translate-x-1/2 rounded-md border border-dashed border-[#e9204f]/35" />
+            {/* Print Area Guide */}
+            <div className={cn(
+              "pointer-events-none absolute left-1/2 top-[34%] h-[210px] w-[200px] -translate-x-1/2 rounded-md transition-colors",
+              elementsOutOfBounds.length > 0 
+                ? "border-2 border-red-500 shadow-lg shadow-red-500/30 bg-red-500/5" 
+                : "border border-dashed border-[#e9204f]/35"
+            )} />
 
             <div className="absolute inset-0 overflow-hidden rounded-2xl">
               {elements.map((el) => (
@@ -259,6 +285,7 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
                   key={el.id}
                   el={el}
                   selected={el.id === selectedId}
+                  outOfBounds={isOutOfBounds(el)}
                   onPointerDown={(e) => startMove(e, el)}
                 />
               ))}
@@ -381,13 +408,16 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
   )
 }
 
+
 function ElementView({
   el,
   selected,
+  outOfBounds = false,
   onPointerDown,
 }: {
   el: DesignElement
   selected: boolean
+  outOfBounds?: boolean
   onPointerDown: (e: React.PointerEvent) => void
 }) {
   const baseStyle: React.CSSProperties = {
@@ -404,6 +434,7 @@ function ElementView({
       onPointerDown={onPointerDown}
       className={cn(
         "absolute cursor-move",
+        outOfBounds && "ring-2 ring-red-500 ring-opacity-60",
         selected ? "z-10" : "transition-shadow hover:outline hover:outline-1 hover:outline-[#e9204f]/40",
       )}
       style={baseStyle}
