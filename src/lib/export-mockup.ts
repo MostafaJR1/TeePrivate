@@ -82,11 +82,31 @@ export async function exportMockup(
       ctx.fillStyle = el.color
       roundRect(ctx, el.x, el.y, el.width, el.height, 6)
       ctx.fill()
+    } else if (el.type === "circle") {
+      ctx.fillStyle = el.color
+      ctx.beginPath()
+      ctx.arc(cx, cy, Math.min(el.width, el.height) / 2, 0, Math.PI * 2)
+      ctx.fill()
     } else if (el.type === "ellipse") {
       ctx.fillStyle = el.color
       ctx.beginPath()
       ctx.ellipse(cx, cy, el.width / 2, el.height / 2, 0, 0, Math.PI * 2)
       ctx.fill()
+    } else if (el.type === "triangle") {
+      ctx.fillStyle = el.color
+      ctx.beginPath()
+      ctx.moveTo(cx, el.y)
+      ctx.lineTo(el.x + el.width, el.y + el.height)
+      ctx.lineTo(el.x, el.y + el.height)
+      ctx.closePath()
+      ctx.fill()
+    } else if (el.type === "line") {
+      ctx.strokeStyle = el.color
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(el.x, el.y + el.height / 2)
+      ctx.lineTo(el.x + el.width, el.y + el.height / 2)
+      ctx.stroke()
     } else if (el.type === "image" && el.src) {
       const img = imageCache.get(el.src)
       if (img) {
