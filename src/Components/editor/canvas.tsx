@@ -1,28 +1,17 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useCallback, useRef, useState, useEffect } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import type { DesignElement } from "@/lib/editor-types"
-import { createClient } from "@/utils/supabase/client"
-<<<<<<< HEAD
-=======
-import { AnimatePresence } from "framer-motion"
->>>>>>> afba343 (.)
 import { 
   IoSwapHorizontalOutline, 
   IoTrashOutline, 
   IoCopyOutline, 
   IoRefreshOutline,
 } from "react-icons/io5"
-<<<<<<< HEAD
 import { ImageSelectorModal } from "./image-selector-modal"
 import { ShapeSelectorModal } from "./shape-selector-modal"
-=======
 import Image from "next/image";
->>>>>>> afba343 (.)
-
-const supabase = createClient()
 
 // Print area boundaries (based on visual guide in canvas)
 const PRINT_AREA = {
@@ -60,12 +49,11 @@ type DragState =
 
 const HANDLES = ["nw", "ne", "sw", "se"] as const
 
-export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, activeTool, onAddElement, mockupOpacity = 1 }: CanvasProps) {
+export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, activeTool, onAddElement }: CanvasProps) {
   const [zoom, setZoom] = useState(1)
   const dragRef = useRef<DragState>(null)
   const frameRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const lastDistanceRef = useRef<number>(0)
 
   const [showImageSelector, setShowImageSelector] = useState(false)
   const [showShapeSelector, setShowShapeSelector] = useState(false)
@@ -83,9 +71,22 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
 
   const elementsOutOfBounds = elements.filter(isOutOfBounds)
 
+  const lastActiveToolRef = useRef<string | undefined>(undefined)
+
   useEffect(() => {
-    if (activeTool === "image") setShowImageSelector(true)
-    else if (activeTool === "shapes") setShowShapeSelector(true)
+    // Avoid setState cascades: only update when tool changes.
+    if (activeTool === lastActiveToolRef.current) return
+    lastActiveToolRef.current = activeTool
+
+    setTimeout(() => {
+    if (activeTool === "image") {
+        setShowImageSelector(true)
+        setShowShapeSelector(false)
+      } else if (activeTool === "shapes") {
+        setShowShapeSelector(true)
+        setShowImageSelector(false)
+      }
+    }, 0)
   }, [activeTool])
 
   // Pinch zoom
@@ -133,10 +134,26 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
     dragRef.current = null
   }, [])
 
+  // Prevent drag from getting stuck if pointerup happens outside the canvas.
+  useEffect(() => {
+    const handleWindowPointerUp = () => {
+      dragRef.current = null
+    }
+    window.addEventListener("pointerup", handleWindowPointerUp)
+    window.addEventListener("pointercancel", handleWindowPointerUp)
+    return () => {
+      window.removeEventListener("pointerup", handleWindowPointerUp)
+      window.removeEventListener("pointercancel", handleWindowPointerUp)
+    }
+  }, [])
+
   const startMove = (e: React.PointerEvent, el: DesignElement) => {
     e.stopPropagation()
     onSelect(el.id)
-    ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+    const target = e.target as HTMLElement;
+    if (target && typeof target.setPointerCapture === "function") {
+      target.setPointerCapture(e.pointerId);
+    }
     dragRef.current = {
       mode: "move",
       id: el.id,
@@ -149,7 +166,10 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
 
   const startResize = (e: React.PointerEvent, el: DesignElement, handle: string) => {
     e.stopPropagation()
-    ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+    const target = e.target as HTMLElement;
+    if (target && typeof target.setPointerCapture === "function") {
+      target.setPointerCapture(e.pointerId);
+    }
     dragRef.current = {
       mode: "resize",
       id: el.id,
@@ -166,7 +186,9 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
   const startRotate = (e: React.PointerEvent, el: DesignElement) => {
     e.stopPropagation()
     const handle = e.currentTarget as HTMLElement
-    handle.setPointerCapture(e.pointerId)
+    if (handle && typeof handle.setPointerCapture === "function") {
+      handle.setPointerCapture(e.pointerId);
+    }
 
     const rect = handle.parentElement?.getBoundingClientRect()
     if (!rect) return
@@ -186,7 +208,7 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
       try {
         handle.releasePointerCapture(upEvent.pointerId)
       } catch {
-        //
+        // Fallback for pointer release transitions
       }
       window.removeEventListener("pointermove", handlePointerMove)
       window.removeEventListener("pointerup", handlePointerUp)
@@ -197,13 +219,8 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
   }
 
   const handleDuplicate = (e: React.MouseEvent, el: DesignElement) => {
-<<<<<<< HEAD
     e.stopPropagation()
     const duplicateId = `el-${Date.now()}`
-=======
-    e.stopPropagation();
-    const duplicateId = `el-${Date?.now()}-${Math.random().toString(16).slice(2)}`;
->>>>>>> afba343 (.)
     const duplicate: DesignElement = {
       ...el,
       id: duplicateId,
@@ -241,7 +258,7 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
   const handleShapeSelect = (shape: Partial<DesignElement>) => {
     const el: DesignElement = {
       id: `el-${Date.now()}`,
-      type: shape.type as any,
+      type: shape.type as DesignElement["type"],
       name: shape.name || "Shape",
       x: 150,
       y: 230,
@@ -278,26 +295,16 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
               <span className="font-medium">440 × 520</span>
             </div>
 
-<<<<<<< HEAD
-            <img
+            {/* Mockup Base Image */}
+            <Image
               src="/tshirt-mockup.png"
               alt="Blank t-shirt product mockup base"
-              className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-cover"
-              style={{ opacity: Math.max(0.2, mockupOpacity * 0.95) }}
+              className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-cover opacity-95"
               crossOrigin="anonymous"
+              draggable={false}
+              width={440}
+              height={520}
             />
-=======
-          {/* Mockup Base Image */}
-          <Image
-            src="/tshirt-mockup.png"
-            alt="Blank t-shirt product mockup base"
-            className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-cover opacity-95"
-            crossOrigin="anonymous"
-            draggable={false}
-            width={440}
-            height={520}
-          />
->>>>>>> afba343 (.)
 
             {/* Print Area Guide */}
             <div className={cn(
@@ -318,112 +325,6 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
                     Move all designs inside the red border
                   </p>
                 </div>
-<<<<<<< HEAD
-=======
-
-                {/* ============================================================================
-                   B. IMAGE SWAPPER SUB-DRAWER [1]
-                   ============================================================================ */}
-                <AnimatePresence>
-                  {replaceTargetId === el.id && el.type === "image" && (
-                    <div
-                      ref={replaceMenuRef}
-                      style={{ 
-                        transform: `rotate(${-el.rotation}deg)`,
-                        top: "calc(100% + 18px)" // Renders underneath to prevent overlap [1]
-                      }}
-                      className="absolute left-1/2 -translate-x-1/2 z-50 bg-[#131315]/95 border border-white/5 backdrop-blur-md rounded-2xl p-3.5 shadow-2xl flex flex-col gap-3 w-64 pointer-events-auto select-none"
-                    >
-                      {/* Tab selection switcher */}
-                      <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setReplaceTab("stock"); }}
-                          className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-md text-center cursor-pointer transition ${
-                            replaceTab === "stock" ? "bg-white text-black font-black" : "text-neutral-400 hover:text-white"
-                          }`}
-                        >
-                          Stock Art
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setReplaceTab("uploads"); }}
-                          className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-md text-center cursor-pointer transition ${
-                            replaceTab === "uploads" ? "bg-white text-black font-black" : "text-neutral-400 hover:text-white"
-                          }`}
-                        >
-                          My Uploads
-                        </button>
-                      </div>
-
-                      {/* Design selection list [1] */}
-                      <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-                        {replaceTab === "stock" ? (
-                          dbStockDesigns.map((asset) => (
-                            <button
-                              key={asset.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onUpdate(el.id, { src: asset.url });
-                                setReplaceTargetId(null);
-                              }}
-                              className="relative w-12 h-12 bg-neutral-900 border border-white/5 rounded-lg overflow-hidden shrink-0 hover:border-[#e9204f]/40 cursor-pointer transition flex items-center justify-center"
-                            >
-                              <Image src={asset.url} alt={asset.name} className="max-w-full max-h-full object-contain p-1" />
-                            </button>
-                          ))
-                        ) : (
-                          userUploads.map((asset) => (
-                            <button
-                              key={asset.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onUpdate(el.id, { src: asset.url });
-                                setReplaceTargetId(null);
-                              }}
-                              className="relative w-12 h-12 bg-neutral-900 border border-white/5 rounded-lg overflow-hidden shrink-0 hover:border-[#e9204f]/40 cursor-pointer transition flex items-center justify-center"
-                            >
-                              <Image src={asset.url} alt="User Upload" className="max-w-full max-h-full object-contain p-1" />
-                            </button>
-                          ))
-                        )}
-                        {replaceTab === "stock" && dbStockDesigns.length === 0 && (
-                          <span className="text-[9px] font-black uppercase tracking-wider text-neutral-500 py-3 mx-auto">No stock designs</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </AnimatePresence>
-
-                {/* Sizer Handles */}
-                {HANDLES.map((h) => (
-                  <span
-                    key={h}
-                    onPointerDown={(e) => startResize(e, el, h)}
-                    className={cn(
-                      "pointer-events-auto absolute size-3 rounded-full border-2 border-[#e9204f] bg-white shadow-lg shadow-[#e9204f]/40 hover:scale-125 transition-transform",
-                      h === "nw" && "-left-1.5 -top-1.5 cursor-nwse-resize",
-                      h === "ne" && "-right-1.5 -top-1.5 cursor-nesw-resize",
-                      h === "sw" && "-bottom-1.5 -left-1.5 cursor-nesw-resize",
-                      h === "se" && "-bottom-1.5 -right-1.5 cursor-nwse-resize",
-                    )}
-                  />
-                ))}
-
-                {/* Suspended Dashed Rotation Knob */}
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center select-none pointer-events-none">
-                  {/* Dashed connective trace */}
-                  <div className="h-7 w-px border-l border-dashed border-[#e9204f]/40" />
-                  
-                  {/* Rotating handle trigger */}
-                  <div 
-                    onPointerDown={(e) => startRotate(e, el)}
-                    className="w-6 h-6 rounded-full bg-[#e9204f] border-2 border-white flex items-center justify-center cursor-alias shadow-lg shadow-[#e9204f]/40 hover:scale-110 transition-transform duration-100 pointer-events-auto"
-                    title="Rotate"
-                  >
-                    <IoRefreshOutline size={13} className="text-white" />
-                  </div>
-                </div>
-
->>>>>>> afba343 (.)
               </div>
             )}
 
