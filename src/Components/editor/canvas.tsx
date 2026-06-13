@@ -196,13 +196,13 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
 
   return (
     <div
-      className="canvas-grid canvas-noise relative flex flex-1 items-center justify-center overflow-hidden bg-[#18181b]"
+      className="canvas-grid canvas-noise relative flex flex-1 items-center justify-center overflow-hidden editor-canvas-bg"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerDown={() => onSelect(null)}
     >
       {/* Radial vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.65))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.7))]" />
 
       {/* Mockup frame */}
       <div
@@ -212,7 +212,7 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
       >
         <div
           ref={frameRef}
-          className="relative h-[520px] w-[440px] select-none rounded-2xl border border-white/5 bg-[#1b1b1b] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
+          className="relative h-[520px] w-[440px] select-none rounded-3xl border border-white/8 bg-[#1b1b1b] shadow-[0_40px_100px_-20px_rgba(233,32,79,0.15),0_20px_60px_-30px_rgba(0,0,0,0.9)]"
         >
           {/* Frame Label */}
           <div className="absolute -top-7 left-0 flex items-center gap-2 text-xs text-neutral-500">
@@ -257,20 +257,18 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
                   transform: `rotate(${el.rotation}deg)`,
                 }}
               >
-                {/* Custom Double-Outline for high contrast [1] */}
-                <div className="absolute inset-0 rounded-[2px] outline outline-[1.5px] outline-[#e9204f] shadow-[0_0_0_1px_rgba(255,255,255,0.7)]" />
+                {/* Custom Double-Outline for high contrast */}
+                <div className="absolute inset-0 rounded-[2px] outline outline-2 outline-[#e9204f] shadow-[0_0_0_3px_rgba(233,32,79,0.1),0_0_20px_rgba(233,32,79,0.25)]" />
                 
                 {/* Dimensions Badge */}
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 rounded bg-[#e9204f] px-1.5 py-0.5 text-[10px] font-black text-white shadow-md">
+                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 rounded-lg bg-[#e9204f] px-2.5 py-1 text-[10px] font-bold text-white shadow-lg shadow-[#e9204f]/30">
                   {Math.round(el.width)} × {Math.round(el.height)}
                 </span>
 
-                {/* ============================================================================
-                   A. FLOATING CONTEXT-AWARE QUICK ACTION TOOLBAR [1]
-                   ============================================================================ */}
+                {/* Floating Context-Aware Quick Action Toolbar */}
                 <div 
-                  style={{ transform: `rotate(${-el.rotation}deg)` }} // Counter-rotates to stay horizontal [1]
-                  className="absolute left-1/2 -top-16 -translate-x-1/2 z-50 bg-[#131315]/95 border border-white/5 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-1 shadow-2xl pointer-events-auto select-none"
+                  style={{ transform: `rotate(${-el.rotation}deg)` }}
+                  className="absolute left-1/2 -top-14 -translate-x-1/2 z-50 bg-[#0a0a0a]/60 border border-white/10 backdrop-blur-xl rounded-2xl px-2 py-2 flex items-center gap-1 shadow-2xl pointer-events-auto select-none"
                 >
                   {/* Image Swapper Option (Visible only on Image layers) [1] */}
                   {el.type === "image" && (
@@ -280,25 +278,25 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
                           e.stopPropagation();
                           setReplaceTargetId(replaceTargetId === el.id ? null : el.id);
                         }}
-                        className="p-1.5 hover:bg-white/5 rounded-full text-neutral-400 hover:text-[#e9204f] transition duration-150 cursor-pointer"
-                        title="Replace Design Artwork"
+                        className="p-2 hover:bg-white/10 rounded-lg text-neutral-400 hover:text-[#e9204f] transition duration-150 cursor-pointer active:scale-95"
+                        title="Replace Design"
                       >
-                        <IoSwapHorizontalOutline size={14} className={replaceTargetId === el.id ? "text-[#e9204f]" : ""} />
+                        <IoSwapHorizontalOutline size={15} className={replaceTargetId === el.id ? "text-[#e9204f]" : ""} />
                       </button>
-                      <div className="h-4 w-[1px] bg-white/5 mx-1" />
+                      <div className="h-5 w-px bg-white/5 mx-0.5" />
                     </>
                   )}
 
                   {/* Duplicate Action [1] */}
                   <button
                     onClick={(e) => handleDuplicate(e, el)}
-                    className="p-1.5 hover:bg-white/5 rounded-full text-neutral-400 hover:text-white transition duration-150 cursor-pointer"
+                    className="p-2 hover:bg-white/10 rounded-lg text-neutral-400 hover:text-white transition duration-150 cursor-pointer active:scale-95"
                     title="Duplicate Layer"
                   >
-                    <IoCopyOutline size={14} />
+                    <IoCopyOutline size={15} />
                   </button>
 
-                  <div className="h-4 w-[1px] bg-white/5 mx-1" />
+                  <div className="h-5 w-px bg-white/5 mx-0.5" />
 
                   {/* Delete Action (Connected securely to onDelete prop) [1] */}
                   <button
@@ -306,10 +304,10 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
                       e.stopPropagation();
                       onDelete(el.id);
                     }}
-                    className="p-1.5 hover:bg-red-500/10 text-neutral-400 hover:text-[#e9204f] rounded-full transition duration-150 cursor-pointer"
+                    className="p-2 hover:bg-red-500/10 text-neutral-400 hover:text-[#e9204f] rounded-lg transition duration-150 cursor-pointer active:scale-95"
                     title="Delete Element"
                   >
-                    <IoTrashOutline size={14} />
+                    <IoTrashOutline size={15} />
                   </button>
                 </div>
 
@@ -391,7 +389,7 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
                     key={h}
                     onPointerDown={(e) => startResize(e, el, h)}
                     className={cn(
-                      "pointer-events-auto absolute size-2.5 rounded-[3px] border border-[#e9204f] bg-white shadow-sm",
+                      "pointer-events-auto absolute size-3 rounded-full border-2 border-[#e9204f] bg-white shadow-lg shadow-[#e9204f]/40 hover:scale-125 transition-transform",
                       h === "nw" && "-left-1.5 -top-1.5 cursor-nwse-resize",
                       h === "ne" && "-right-1.5 -top-1.5 cursor-nesw-resize",
                       h === "sw" && "-bottom-1.5 -left-1.5 cursor-nesw-resize",
@@ -400,20 +398,18 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
                   />
                 ))}
 
-                {/* ============================================================================
-                   C. SUSPENDED DASHED ROTATION KNOB [1]
-                   ============================================================================ */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center select-none pointer-events-none">
+                {/* Suspended Dashed Rotation Knob */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center select-none pointer-events-none">
                   {/* Dashed connective trace */}
-                  <div className="h-6 w-[1px] border-l border-dashed border-[#e9204f]/60" />
+                  <div className="h-7 w-px border-l border-dashed border-[#e9204f]/40" />
                   
-                  {/* Rotating handle trigger [1, 1.2.2] */}
+                  {/* Rotating handle trigger */}
                   <div 
                     onPointerDown={(e) => startRotate(e, el)}
-                    className="w-5 h-5 rounded-full bg-white border border-[#e9204f] flex items-center justify-center cursor-alias shadow-md hover:scale-105 transition-transform duration-100 pointer-events-auto"
+                    className="w-6 h-6 rounded-full bg-[#e9204f] border-2 border-white flex items-center justify-center cursor-alias shadow-lg shadow-[#e9204f]/40 hover:scale-110 transition-transform duration-100 pointer-events-auto"
                     title="Rotate"
                   >
-                    <IoRefreshOutline size={12} className="text-[#e9204f]" />
+                    <IoRefreshOutline size={13} className="text-white" />
                   </div>
                 </div>
 
@@ -424,37 +420,41 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete }: C
       </div>
 
       {/* Drag hint (HUD Glass) */}
-      <div className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 rounded-full border border-white/5 bg-[#131315]/85 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-neutral-400 backdrop-blur-md">
-        Drag elements to position · click to select · drag handles to resize
+      <div className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-white/5 bg-[#0a0a0a]/40 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500 backdrop-blur-xl">
+        Drag to move · Handles to resize · Rotation handle above
       </div>
 
       {/* Zoom controls (HUD Glass) */}
-      <div className="absolute bottom-4 right-4 z-30 flex items-center gap-1 rounded-xl border border-white/5 bg-[#131315]/85 p-1.5 backdrop-blur-md">
+      <div className="absolute bottom-6 right-6 z-30 flex items-center gap-2 rounded-2xl border border-white/5 bg-[#0a0a0a]/40 px-2 py-2 backdrop-blur-xl">
         <button
           onClick={() => setZoom((z) => Math.max(0.25, +(z - 0.1).toFixed(2)))}
-          className="flex size-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+          className="flex size-9 items-center justify-center rounded-lg text-neutral-400 transition-all hover:bg-white/10 hover:text-white active:scale-95"
           aria-label="Zoom out"
+          title="Zoom Out"
         >
           <Minus className="size-4" />
         </button>
         <button
           onClick={() => setZoom(1)}
-          className="min-w-12 rounded-lg px-2 py-1 text-xs font-black uppercase tracking-wider text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
+          className="min-w-14 rounded-lg px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400 transition-all hover:bg-white/10 hover:text-white cursor-pointer"
+          title="Reset Zoom"
         >
           {Math.round(zoom * 100)}%
         </button>
         <button
           onClick={() => setZoom((z) => Math.min(2.5, +(z + 0.1).toFixed(2)))}
-          className="flex size-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+          className="flex size-9 items-center justify-center rounded-lg text-neutral-400 transition-all hover:bg-white/10 hover:text-white active:scale-95"
           aria-label="Zoom in"
+          title="Zoom In"
         >
           <Plus className="size-4" />
         </button>
-        <div className="mx-1 h-5 w-px bg-white/5" />
+        <div className="mx-1.5 h-6 w-px bg-white/5" />
         <button
           onClick={() => setZoom(1)}
-          className="flex size-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+          className="flex size-9 items-center justify-center rounded-lg text-neutral-400 transition-all hover:bg-white/10 hover:text-white active:scale-95"
           aria-label="Fit to screen"
+          title="Fit to Screen"
         >
           <Maximize2 className="size-4" />
         </button>
