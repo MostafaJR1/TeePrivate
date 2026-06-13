@@ -5,14 +5,22 @@ import { useCallback, useRef, useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import type { DesignElement } from "@/lib/editor-types"
 import { createClient } from "@/utils/supabase/client"
+<<<<<<< HEAD
+=======
+import { AnimatePresence } from "framer-motion"
+>>>>>>> afba343 (.)
 import { 
   IoSwapHorizontalOutline, 
   IoTrashOutline, 
   IoCopyOutline, 
   IoRefreshOutline,
 } from "react-icons/io5"
+<<<<<<< HEAD
 import { ImageSelectorModal } from "./image-selector-modal"
 import { ShapeSelectorModal } from "./shape-selector-modal"
+=======
+import Image from "next/image";
+>>>>>>> afba343 (.)
 
 const supabase = createClient()
 
@@ -189,8 +197,13 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
   }
 
   const handleDuplicate = (e: React.MouseEvent, el: DesignElement) => {
+<<<<<<< HEAD
     e.stopPropagation()
     const duplicateId = `el-${Date.now()}`
+=======
+    e.stopPropagation();
+    const duplicateId = `el-${Date?.now()}-${Math.random().toString(16).slice(2)}`;
+>>>>>>> afba343 (.)
     const duplicate: DesignElement = {
       ...el,
       id: duplicateId,
@@ -265,6 +278,7 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
               <span className="font-medium">440 × 520</span>
             </div>
 
+<<<<<<< HEAD
             <img
               src="/tshirt-mockup.png"
               alt="Blank t-shirt product mockup base"
@@ -272,6 +286,18 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
               style={{ opacity: Math.max(0.2, mockupOpacity * 0.95) }}
               crossOrigin="anonymous"
             />
+=======
+          {/* Mockup Base Image */}
+          <Image
+            src="/tshirt-mockup.png"
+            alt="Blank t-shirt product mockup base"
+            className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-cover opacity-95"
+            crossOrigin="anonymous"
+            draggable={false}
+            width={440}
+            height={520}
+          />
+>>>>>>> afba343 (.)
 
             {/* Print Area Guide */}
             <div className={cn(
@@ -292,6 +318,112 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
                     Move all designs inside the red border
                   </p>
                 </div>
+<<<<<<< HEAD
+=======
+
+                {/* ============================================================================
+                   B. IMAGE SWAPPER SUB-DRAWER [1]
+                   ============================================================================ */}
+                <AnimatePresence>
+                  {replaceTargetId === el.id && el.type === "image" && (
+                    <div
+                      ref={replaceMenuRef}
+                      style={{ 
+                        transform: `rotate(${-el.rotation}deg)`,
+                        top: "calc(100% + 18px)" // Renders underneath to prevent overlap [1]
+                      }}
+                      className="absolute left-1/2 -translate-x-1/2 z-50 bg-[#131315]/95 border border-white/5 backdrop-blur-md rounded-2xl p-3.5 shadow-2xl flex flex-col gap-3 w-64 pointer-events-auto select-none"
+                    >
+                      {/* Tab selection switcher */}
+                      <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/5">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setReplaceTab("stock"); }}
+                          className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-md text-center cursor-pointer transition ${
+                            replaceTab === "stock" ? "bg-white text-black font-black" : "text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          Stock Art
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setReplaceTab("uploads"); }}
+                          className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-md text-center cursor-pointer transition ${
+                            replaceTab === "uploads" ? "bg-white text-black font-black" : "text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          My Uploads
+                        </button>
+                      </div>
+
+                      {/* Design selection list [1] */}
+                      <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                        {replaceTab === "stock" ? (
+                          dbStockDesigns.map((asset) => (
+                            <button
+                              key={asset.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdate(el.id, { src: asset.url });
+                                setReplaceTargetId(null);
+                              }}
+                              className="relative w-12 h-12 bg-neutral-900 border border-white/5 rounded-lg overflow-hidden shrink-0 hover:border-[#e9204f]/40 cursor-pointer transition flex items-center justify-center"
+                            >
+                              <Image src={asset.url} alt={asset.name} className="max-w-full max-h-full object-contain p-1" />
+                            </button>
+                          ))
+                        ) : (
+                          userUploads.map((asset) => (
+                            <button
+                              key={asset.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdate(el.id, { src: asset.url });
+                                setReplaceTargetId(null);
+                              }}
+                              className="relative w-12 h-12 bg-neutral-900 border border-white/5 rounded-lg overflow-hidden shrink-0 hover:border-[#e9204f]/40 cursor-pointer transition flex items-center justify-center"
+                            >
+                              <Image src={asset.url} alt="User Upload" className="max-w-full max-h-full object-contain p-1" />
+                            </button>
+                          ))
+                        )}
+                        {replaceTab === "stock" && dbStockDesigns.length === 0 && (
+                          <span className="text-[9px] font-black uppercase tracking-wider text-neutral-500 py-3 mx-auto">No stock designs</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </AnimatePresence>
+
+                {/* Sizer Handles */}
+                {HANDLES.map((h) => (
+                  <span
+                    key={h}
+                    onPointerDown={(e) => startResize(e, el, h)}
+                    className={cn(
+                      "pointer-events-auto absolute size-3 rounded-full border-2 border-[#e9204f] bg-white shadow-lg shadow-[#e9204f]/40 hover:scale-125 transition-transform",
+                      h === "nw" && "-left-1.5 -top-1.5 cursor-nwse-resize",
+                      h === "ne" && "-right-1.5 -top-1.5 cursor-nesw-resize",
+                      h === "sw" && "-bottom-1.5 -left-1.5 cursor-nesw-resize",
+                      h === "se" && "-bottom-1.5 -right-1.5 cursor-nwse-resize",
+                    )}
+                  />
+                ))}
+
+                {/* Suspended Dashed Rotation Knob */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center select-none pointer-events-none">
+                  {/* Dashed connective trace */}
+                  <div className="h-7 w-px border-l border-dashed border-[#e9204f]/40" />
+                  
+                  {/* Rotating handle trigger */}
+                  <div 
+                    onPointerDown={(e) => startRotate(e, el)}
+                    className="w-6 h-6 rounded-full bg-[#e9204f] border-2 border-white flex items-center justify-center cursor-alias shadow-lg shadow-[#e9204f]/40 hover:scale-110 transition-transform duration-100 pointer-events-auto"
+                    title="Rotate"
+                  >
+                    <IoRefreshOutline size={13} className="text-white" />
+                  </div>
+                </div>
+
+>>>>>>> afba343 (.)
               </div>
             )}
 
@@ -493,12 +625,14 @@ function ElementView({
         />
       )}
       {el.type === "image" && (
-        <img
+        <Image
           src={el.src || "/placeholder.svg"}
           alt={el.name}
           className="h-full w-full object-contain"
           draggable={false}
           crossOrigin="anonymous"
+          width={el.width}
+          height={el.height}
         />
       )}
     </div>
