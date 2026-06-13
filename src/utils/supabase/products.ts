@@ -23,12 +23,22 @@ export interface DatabaseProduct {
  */
 export const getGlobalProducts = unstable_cache(
   async (): Promise<DatabaseProduct[]> => {
+    // Check if Supabase credentials are available
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // Return empty array if credentials are missing
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn("[v0] Supabase credentials not configured. Products will be empty.");
+      return [];
+    }
+
     // Dynamically import client on the server to prevent environmental leaks [1.1.9]
     const { createClient } = await import("@supabase/supabase-js");
     
     const directSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      supabaseUrl,
+      supabaseKey
     );
 
     const { data, error } = await directSupabase
@@ -38,7 +48,7 @@ export const getGlobalProducts = unstable_cache(
 
     if (error) {
       console.error("Database cache retrieval error:", error);
-      throw error;
+      return [];
     }
 
     return (data as DatabaseProduct[]) || [];
