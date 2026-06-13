@@ -4,6 +4,14 @@ export const FRAME_WIDTH = 440
 export const FRAME_HEIGHT = 520
 const MOCKUP_SRC = "/tshirt-mockup.png"
 
+// Print area boundaries (must match canvas PRINT_AREA)
+const PRINT_AREA = {
+  x: 120,
+  y: 140,
+  width: 200,
+  height: 210,
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -57,7 +65,13 @@ export async function exportMockup(
       }),
   )
 
-  // Draw each element in order (clipped to the frame bounds)
+  // Create clipping region for print area - ensures designs only appear within bounds
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(PRINT_AREA.x, PRINT_AREA.y, PRINT_AREA.width, PRINT_AREA.height)
+  ctx.clip()
+
+  // Draw each element in order (clipped to the print area bounds)
   for (const el of elements) {
     ctx.save()
     ctx.globalAlpha = el.opacity
@@ -126,6 +140,9 @@ export async function exportMockup(
 
     ctx.restore()
   }
+
+  // Restore clipping
+  ctx.restore()
 
   // Trigger download
   const url = canvas.toDataURL("image/png")
