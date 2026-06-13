@@ -4,9 +4,8 @@ export type ToolId =
   | "text"
   | "shapes"
   | "image"
-  | "ai"
 
-export type ElementType = "text" | "rect" | "ellipse" | "image"
+export type ElementType = "text" | "rect" | "circle" | "triangle" | "line" | "ellipse" | "image"
 
 export interface DesignElement {
   id: string
