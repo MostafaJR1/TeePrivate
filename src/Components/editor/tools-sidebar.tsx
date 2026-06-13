@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ToolId } from "@/lib/editor-types"
+import { ToolSection } from "./tool-section"
 
 interface Tool {
   id: ToolId
@@ -19,9 +20,12 @@ interface Tool {
   shortcut: string
 }
 
-const TOOLS: Tool[] = [
+const SELECTION_TOOLS: Tool[] = [
   { id: "select", label: "Select", icon: MousePointer2, shortcut: "V" },
   { id: "move", label: "Move", icon: Move, shortcut: "M" },
+]
+
+const CREATION_TOOLS: Tool[] = [
   { id: "text", label: "Text", icon: Type, shortcut: "T" },
   { id: "shapes", label: "Shapes", icon: Shapes, shortcut: "S" },
   { id: "image", label: "Image", icon: ImageIcon, shortcut: "I" },
@@ -33,48 +37,92 @@ interface ToolsSidebarProps {
   onToolChange: (tool: ToolId) => void
 }
 
+function ToolButton({
+  tool,
+  isActive,
+  onClick,
+}: {
+  tool: Tool
+  isActive: boolean
+  onClick: () => void
+}) {
+  const Icon = tool.icon
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={isActive}
+      aria-label={tool.label}
+      className={cn(
+        "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+        isActive
+          ? "bg-[#e9204f]/15 text-[#e9204f] border border-[#e9204f]/30"
+          : "text-neutral-400 hover:bg-white/5 hover:text-white border border-transparent",
+      )}
+    >
+      {isActive && (
+        <span className="absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[#e9204f]" />
+      )}
+      <Icon className={cn("size-5 flex-shrink-0", isActive && "drop-shadow-[0_0_8px_rgba(233,32,79,0.4)]")} />
+      <span className="flex-1 text-left truncate">{tool.label}</span>
+      <kbd
+        className={cn(
+          "hidden text-[10px] font-bold uppercase px-1.5 py-1 rounded bg-white/5 text-neutral-500 whitespace-nowrap lg:inline",
+          isActive && "bg-[#e9204f]/20 text-[#e9204f]",
+        )}
+      >
+        {tool.shortcut}
+      </kbd>
+    </button>
+  )
+}
+
 export function ToolsSidebar({ activeTool, onToolChange }: ToolsSidebarProps) {
   return (
-    <aside className="z-20 flex w-[76px] shrink-0 flex-col items-center gap-1 border-r border-white/5 bg-[#131315]/90 py-3 backdrop-blur-xl select-none">
-      {TOOLS.map((tool) => {
-        const Icon = tool.icon
-        const active = activeTool === tool.id
-        return (
-          <button
-            key={tool.id}
-            onClick={() => onToolChange(tool.id)}
-            aria-pressed={active}
-            aria-label={tool.label}
-            className={cn(
-              "group relative flex w-[60px] flex-col items-center gap-1 rounded-xl py-2.5 transition-all duration-200",
-              active
-                ? "bg-[#e9204f]/10 text-[#e9204f]" // Active brand color highlight [1]
-                : "text-neutral-500 hover:bg-white/5 hover:text-white",
-            )}
-          >
-            {active && (
-              // Left-side active selection bar in pink [1]
-              <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-[#e9204f]" />
-            )}
-            <Icon
-              className={cn(
-                "size-5 transition-transform duration-200 group-hover:scale-110",
-                active && "drop-shadow-[0_0_6px_rgba(233,32,79,0.35)]",
-              )}
-            />
-            <span className="text-[10px] font-medium leading-none">
-              {tool.label}
-            </span>
-            {/* Shortcut Tooltip */}
-            <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md border border-white/5 bg-[#1c1c1e] px-2.5 py-1 text-[11px] text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100 md:block z-50">
-              {tool.label}
-              <kbd className="ml-1.5 rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-neutral-500 font-bold uppercase">
-                {tool.shortcut}
-              </kbd>
-            </span>
-          </button>
-        )
-      })}
+    <aside className="z-20 flex w-56 shrink-0 flex-col border-r border-white/5 bg-[#0a0a0a]/50 backdrop-blur-xl text-white select-none overflow-y-auto editor-scrollbar">
+      <div className="flex-1 space-y-1 p-4">
+        <ToolSection title="Selection & Navigation" defaultOpen={true}>
+          <div className="space-y-2">
+            {SELECTION_TOOLS.map((tool) => (
+              <ToolButton
+                key={tool.id}
+                tool={tool}
+                isActive={activeTool === tool.id}
+                onClick={() => onToolChange(tool.id)}
+              />
+            ))}
+          </div>
+        </ToolSection>
+
+        <ToolSection title="Content Creation" defaultOpen={true}>
+          <div className="space-y-2">
+            {CREATION_TOOLS.map((tool) => (
+              <ToolButton
+                key={tool.id}
+                tool={tool}
+                isActive={activeTool === tool.id}
+                onClick={() => onToolChange(tool.id)}
+              />
+            ))}
+          </div>
+        </ToolSection>
+
+        <ToolSection title="Quick Tips" defaultOpen={false}>
+          <div className="space-y-2 text-xs text-neutral-400">
+            <div className="flex gap-2 items-start">
+              <span className="text-[#e9204f] font-bold">•</span>
+              <span>Drag elements on canvas to move them</span>
+            </div>
+            <div className="flex gap-2 items-start">
+              <span className="text-[#e9204f] font-bold">•</span>
+              <span>Use Properties panel to fine-tune</span>
+            </div>
+            <div className="flex gap-2 items-start">
+              <span className="text-[#e9204f] font-bold">•</span>
+              <span>Export your design when ready</span>
+            </div>
+          </div>
+        </ToolSection>
+      </div>
     </aside>
   )
 }

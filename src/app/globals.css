@@ -1,55 +1,322 @@
 @import "tailwindcss";
+
 :root {
---background: #ffffff;
---foreground: #171717;
+  /* Editor Colors */
+  --editor-bg-dark: #0a0a0a;
+  --editor-bg-panels: #131315;
+  --editor-bg-canvas: #18181b;
+  --editor-bg-surface: #1c1c1e;
+  --editor-bg-hover: #242427;
+  --editor-text-primary: #ffffff;
+  --editor-text-secondary: #a1a1a6;
+  --editor-text-tertiary: #76767a;
+  --editor-border: rgba(255, 255, 255, 0.08);
+  --editor-border-subtle: rgba(255, 255, 255, 0.04);
+  --editor-accent: #e9204f;
+  --editor-accent-hover: #ee2755;
+  --editor-accent-active: #d0134a;
+  --editor-accent-glow: rgba(233, 32, 79, 0.25);
+  
+  --background: #ffffff;
+  --foreground: #171717;
 }
+
 @theme inline {
---color-background: var(--background);
---color-foreground: var(--foreground);
---primary-font: var(--font-space-nunito);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --primary-font: var(--font-space-nunito);
 }
 
 @media (prefers-color-scheme: dark) {
-:root {
---foreground: #0a0a0a;
---background: #ffffff;
+  :root {
+    --foreground: #0a0a0a;
+    --background: #ffffff;
+  }
 }
-}
+
 body {
-background: var(--background);
-color: var(--foreground);
-font-family: var(--primary-font), Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--primary-font), Helvetica, sans-serif;
 }
+
+/* Legacy classes for compatibility */
 .black-text {
-color: #1b1b1b;
+  color: #1b1b1b;
 }
+
 .black-bg {
-background-color: #1b1b1b;
+  background-color: #1b1b1b;
 }
+
 .primary-text {
-color: #e9204f;
+  color: #e9204f;
 }
+
 .primary-bg {
-background-color: #e9204f;
-color: #f3f3f3;
-border: 1px solid #b00d33;
+  background-color: #e9204f;
+  color: #f3f3f3;
+  border: 1px solid #b00d33;
 }
+
 .primary-bg:hover {
-background-color: #ee2755;
-color: #f3f3f3;
+  background-color: #ee2755;
+  color: #f3f3f3;
 }
+
 .primary-border {
-border: 1px solid #e9204f;
+  border: 1px solid #e9204f;
 }
 
+/* Editor Design System Utilities */
 
-/* Edge/IE */
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(8px);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes expandCollapse {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 500px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapseSection {
+  from {
+    max-height: 500px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(233, 32, 79, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(233, 32, 79, 0.4);
+  }
+}
+
+.editor-slide-in {
+  animation: slideInRight 200ms ease-out;
+}
+
+.editor-slide-out {
+  animation: slideOutRight 200ms ease-in;
+}
+
+.editor-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+
+.editor-expand {
+  animation: expandCollapse 200ms ease-out;
+}
+
+.editor-collapse {
+  animation: collapseSection 200ms ease-in;
+}
+
+/* Panel and Container Styles */
+.editor-panel {
+  background-color: var(--editor-bg-panels);
+  border-color: var(--editor-border);
+  backdrop-filter: blur(12px);
+}
+
+.editor-surface {
+  background-color: var(--editor-bg-surface);
+  border-color: var(--editor-border-subtle);
+}
+
+.editor-canvas-bg {
+  background-color: var(--editor-bg-canvas);
+}
+
+/* Text and Typography */
+.editor-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--editor-text-secondary);
+  text-transform: uppercase;
+}
+
+.editor-label-secondary {
+  color: var(--editor-text-tertiary);
+  font-size: 0.75rem;
+}
+
+.editor-text-primary {
+  color: var(--editor-text-primary);
+}
+
+.editor-text-secondary {
+  color: var(--editor-text-secondary);
+}
+
+/* Interactive Elements */
+.editor-button-base {
+  transition: all 200ms ease-out;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.editor-button-primary {
+  background-color: var(--editor-accent);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.editor-button-primary:hover {
+  background-color: var(--editor-accent-hover);
+}
+
+.editor-button-primary:active {
+  background-color: var(--editor-accent-active);
+  transform: scale(0.98);
+}
+
+.editor-button-secondary {
+  background-color: transparent;
+  color: var(--editor-text-secondary);
+  border: 1px solid var(--editor-border);
+}
+
+.editor-button-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--editor-text-primary);
+  border-color: var(--editor-border);
+}
+
+/* Input Fields */
+.editor-input {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--editor-border-subtle);
+  color: var(--editor-text-primary);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.875rem;
+  transition: all 150ms ease-out;
+}
+
+.editor-input:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--editor-border);
+}
+
+.editor-input:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--editor-accent);
+  box-shadow: 0 0 0 3px rgba(233, 32, 79, 0.1);
+}
+
+.editor-input::placeholder {
+  color: var(--editor-text-tertiary);
+}
+
+/* Scrollbar Styling */
+.editor-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.editor-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.editor-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Range Slider Styling */
+.editor-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.editor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #e9204f;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  box-shadow: 0 0 12px rgba(233, 32, 79, 0.3);
+}
+
+.editor-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(233, 32, 79, 0.5);
+}
+
+.editor-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #e9204f;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  box-shadow: 0 0 12px rgba(233, 32, 79, 0.3);
+}
+
+.editor-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(233, 32, 79, 0.5);
+}
+
+/* Password Input Fix */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
 
-/* Chrome/WebKit */
 input[type="password"]::-webkit-textfield-decoration-container {
   display: none;
 }

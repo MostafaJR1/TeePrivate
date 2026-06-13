@@ -134,7 +134,7 @@ export default function EditorPage() {
   const selected = elements.find((el) => el.id === selectedId) ?? null
 
   return (
-    <main className="flex h-screen w-full flex-col overflow-hidden bg-black text-white">
+    <main className="flex h-screen w-full flex-col overflow-hidden bg-[#0a0a0a] text-white">
       <TopBar
         projectName={projectName}
         onProjectNameChange={setProjectName}
