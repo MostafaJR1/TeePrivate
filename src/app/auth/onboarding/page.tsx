@@ -16,6 +16,7 @@ import {
   IoStorefrontOutline,
   IoWarningOutline
 } from "react-icons/io5";
+import { FaChevronRight } from "react-icons/fa";
 
 const logoFont = Space_Grotesk({ subsets: ["latin"], weight: ["700"] });
 const supabase = createClient();
@@ -170,7 +171,7 @@ export default function OnboardingPage() {
         </Link>
       </div>
 
-      <div className="w-full max-w-lg bg-white rounded-[2.5rem] border border-neutral-200/50 shadow-2xl p-8 md:p-12 text-black relative overflow-hidden z-10">
+      <div className="w-full max-w-lg bg-white rounded-md border border-neutral-200/50 shadow-2xl p-8 md:p-12 text-black relative overflow-hidden z-10">
         {currentStep < 4 && (
           <div className="w-full h-1 bg-neutral-100 rounded-full mb-8 relative overflow-hidden">
             <motion.div
@@ -191,22 +192,22 @@ export default function OnboardingPage() {
               </div>
 
               {errorMessage && (
-                <div className="flex items-center gap-2 bg-red-50 text-red-700 text-xs font-bold p-4 rounded-xl border border-red-100 leading-relaxed">
+                <div className="flex items-center gap-2 bg-red-50 text-red-700 text-xs font-bold p-4 rounded-md border border-red-100 leading-relaxed">
                   <span className="shrink-0"><IoWarningOutline size={16} /></span>
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               <div className="flex flex-col gap-3 mt-2">
-                <button onClick={() => handleSocialRegister("google")} className="flex items-center justify-center gap-3 border border-neutral-200 hover:border-[#e9204f]/40 hover:bg-neutral-50 py-3.5 rounded-xl transition cursor-pointer font-bold text-sm text-neutral-700">
+                <button onClick={() => handleSocialRegister("google")} className="flex items-center justify-center gap-3 border border-neutral-200 hover:border-[#e9204f]/40 hover:bg-neutral-50 py-3.5 rounded-md transition cursor-pointer font-bold text-sm text-neutral-700">
                   <IoLogoGoogle size={18} className="text-neutral-700" />
                   <span>Register with Google</span>
                 </button>
-                <button onClick={() => handleSocialRegister("twitter")} className="flex items-center justify-center gap-3 border border-neutral-200 hover:border-[#e9204f]/40 hover:bg-neutral-50 py-3.5 rounded-xl transition cursor-pointer font-bold text-sm text-neutral-700">
+                <button onClick={() => handleSocialRegister("twitter")} className="flex items-center justify-center gap-3 border border-neutral-200 hover:border-[#e9204f]/40 hover:bg-neutral-50 py-3.5 rounded-md transition cursor-pointer font-bold text-sm text-neutral-700">
                   <IoLogoTwitter size={18} className="text-sky-500" />
                   <span>Register with X</span>
                 </button>
-                <button onClick={() => handleSocialRegister("facebook")} className="flex items-center justify-center gap-3 border border-neutral-200 hover:border-[#e9204f]/40 hover:bg-neutral-50 py-3.5 rounded-xl transition cursor-pointer font-bold text-sm text-neutral-700">
+                <button onClick={() => handleSocialRegister("facebook")} className="flex items-center justify-center gap-3 border border-neutral-200 hover:border-[#e9204f]/40 hover:bg-neutral-50 py-3.5 rounded-md transition cursor-pointer font-bold text-sm text-neutral-700">
                   <IoLogoFacebook size={18} className="text-blue-600" />
                   <span>Register with Facebook</span>
                 </button>
@@ -227,26 +228,26 @@ export default function OnboardingPage() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Store / Brand Name</label>
-                <div className="relative flex items-center bg-neutral-50 border border-neutral-200 focus-within:border-[#e9204f]/40 rounded-xl transition duration-150 p-1">
+                <div className="relative flex items-center bg-neutral-50 border border-neutral-200 focus-within:border-[#e9204f]/40 rounded-md transition duration-150 p-1">
                   <div className="pl-3 text-neutral-400"><IoStorefrontOutline size={18} /></div>
-                  <input type="text" required placeholder="My Brand Shop" value={storeName} onChange={(e) => setStoreName(e.target.value)} className="w-full pl-3 pr-4 py-2.5 bg-transparent outline-none text-sm font-semibold text-neutral-800 placeholder-neutral-400" />
+                  <input type="text" required placeholder="My Brand Shop" value={storeName} onChange={(e) => setStoreName(e.target.value)} className="w-full pl-2 pr-4 py-2 bg-transparent outline-none text-sm font-semibold text-neutral-800 placeholder-neutral-400" />
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <div onClick={() => setUserRole("artist")} className={`p-4 rounded-xl border-2 cursor-pointer transition select-none ${userRole === "artist" ? "border-[#e9204f] bg-[#e9204f]/5" : "border-neutral-200 hover:border-neutral-300"}`}>
+                <div onClick={() => setUserRole("artist")} className={`p-4 rounded-md border-2 cursor-pointer transition select-none ${userRole === "artist" ? "border-[#e9204f] bg-[#e9204f]/5" : "border-neutral-200 hover:border-neutral-300"}`}>
                   <h3 className="text-xs font-black text-neutral-800 mb-0.5">Start selling & building a brand</h3>
                   <p className="text-[10px] text-neutral-400 font-semibold leading-relaxed">I want to sync products to my store and utilize automated fulfillment across Morocco.</p>
                 </div>
-                <div onClick={() => setUserRole("builder")} className={`p-4 rounded-xl border-2 cursor-pointer transition select-none ${userRole === "builder" ? "border-[#e9204f] bg-[#e9204f]/5" : "border-neutral-200 hover:border-neutral-300"}`}>
+                <div onClick={() => setUserRole("builder")} className={`p-4 rounded-md border-2 cursor-pointer transition select-none ${userRole === "builder" ? "border-[#e9204f] bg-[#e9204f]/5" : "border-neutral-200 hover:border-neutral-300"}`}>
                   <h3 className="text-xs font-black text-neutral-800 mb-0.5">Customize articles for myself</h3>
                   <p className="text-[10px] text-neutral-400 font-semibold leading-relaxed">I want to craft premium custom hoodies, mugs, or gifts for personal use or local teams.</p>
                 </div>
               </div>
 
-              <button type="submit" disabled={!isStepValid()} className="primary-bg cursor-pointer w-full py-4 mt-2 rounded-2xl font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 flex items-center justify-center gap-2">
+              <button type="submit" disabled={!isStepValid()} className="primary-bg cursor-pointer w-full py-2.5 rounded-md font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 flex items-center justify-center gap-2">
                 <span>Continue</span>
-                <IoArrowForward size={16} />
+                <FaChevronRight size={13} className="bg-white primary-text rounded-full p-0.5" />
               </button>
             </motion.form>
           )}
@@ -260,15 +261,15 @@ export default function OnboardingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 {["Shopify", "YouCan.shop", "Storeino", "WooCommerce", "Wix", "None / Custom"].map((platform) => (
-                  <div key={platform} onClick={() => setIntegration(platform)} className={`p-4 rounded-xl border-2 text-center font-bold text-xs cursor-pointer transition select-none flex items-center justify-center h-16 ${integration === platform ? "border-[#e9204f] bg-[#e9204f]/5 text-neutral-900" : "border-neutral-200 text-neutral-500 hover:border-neutral-300"}`}>{platform}</div>
+                  <div key={platform} onClick={() => setIntegration(platform)} className={`p-4 rounded-md border-2 text-center font-bold text-xs cursor-pointer transition select-none flex items-center justify-center h-16 ${integration === platform ? "border-[#e9204f] bg-[#e9204f]/5 text-neutral-900" : "border-neutral-200 text-neutral-500 hover:border-neutral-300"}`}>{platform}</div>
                 ))}
               </div>
 
               <div className="flex items-center gap-3 mt-4">
-                <button type="button" onClick={handleBack} className="w-14 py-4 rounded-2xl border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center text-neutral-600 transition cursor-pointer"><IoArrowBack size={18} /></button>
-                <button type="button" onClick={handleNext} disabled={!isStepValid()} className="primary-bg cursor-pointer flex-grow py-4 rounded-2xl font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 flex items-center justify-center gap-2">
+                <button type="button" onClick={handleBack} className="w-14 py-3 rounded-md border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center text-neutral-600 transition cursor-pointer"><IoArrowBack size={18} /></button>
+                <button type="button" onClick={handleNext} disabled={!isStepValid()} className="primary-bg cursor-pointer w-full py-2.5 rounded-md font-bold text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 flex items-center justify-center gap-2">
                   <span>Build Dashboard</span>
-                  <IoArrowForward size={16} />
+                  <FaChevronRight size={13} className="bg-white primary-text rounded-full p-0.5" />
                 </button>
               </div>
             </motion.div>
@@ -287,7 +288,7 @@ export default function OnboardingPage() {
                       <h2 className="text-xl font-black text-neutral-900 mb-1">Activating account...</h2>
                       <p className="text-xs text-neutral-400 font-medium">Securing PostgreSQL profile nodes & refreshing local JWT token [1].</p>
                     </div>
-                    <div className="flex flex-col items-start gap-2.5 bg-neutral-50 p-5 rounded-2xl border border-neutral-150 w-full max-w-[280px] text-xs font-bold text-neutral-500">
+                    <div className="flex flex-col items-start gap-2.5 bg-neutral-50 p-5 rounded-md border border-neutral-150 w-full max-w-[280px] text-xs font-bold text-neutral-500">
                       <div className="flex items-center gap-2"><span className={creationStatus >= 1 ? "text-emerald-500" : "text-neutral-300"}>✓</span><span className={creationStatus >= 1 ? "text-neutral-800" : "text-neutral-400"}>Verifying session token</span></div>
                       <div className="flex items-center gap-2"><span className={creationStatus >= 2 ? "text-emerald-500" : "text-neutral-300"}>✓</span><span className={creationStatus >= 2 ? "text-neutral-800" : "text-neutral-400"}>Saving profile metadata</span></div>
                       <div className="flex items-center gap-2"><span className={creationStatus >= 3 ? "text-emerald-500" : "text-neutral-300"}>✓</span><span className={creationStatus >= 3 ? "text-neutral-800" : "text-neutral-400"}>Refreshing JWT Claims</span></div>
@@ -301,7 +302,7 @@ export default function OnboardingPage() {
                       <p className="text-xs text-neutral-400 font-medium">onboarding metadata has been safely written to your database profile.</p>
                     </div>
                     <div className="mt-4 w-full">
-                      <Link href="/u/dashboard" className="primary-bg cursor-pointer w-full py-4 rounded-2xl font-bold text-sm shadow-md hover:shadow-lg transition duration-150 flex items-center justify-center gap-2">
+                      <Link href="/u/dashboard" className="primary-bg cursor-pointer w-full py-4 rounded-md font-bold text-sm shadow-md hover:shadow-lg transition duration-150 flex items-center justify-center gap-2">
                         <span>Launch Dashboard</span>
                         <IoArrowForward size={16} />
                       </Link>

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       
       // If onboarding is complete, send to dashboard. Otherwise, send to onboarding steps. [1.1.4]
       if (status === "completed") {
-        return NextResponse.redirect(`${origin}/`);
+        return NextResponse.redirect(`${origin}/u/dashboard`);
       } else {
         return NextResponse.redirect(`${origin}/auth/onboarding`);
       }

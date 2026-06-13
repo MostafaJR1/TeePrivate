@@ -115,17 +115,17 @@ export function HeroSection() {
         <div className="lg:col-span-6 flex flex-col justify-center z-10">
           
           {/* SWITCHER / TOGGLE (Using layoutId for smooth sliding background) */}
-          <div className="inline-flex self-start rounded-full bg-black/5 p-1 mb-8 gap-1 backdrop-blur-sm">
+          <div className="inline-flex self-start rounded-xl shadow-sm bg-black/5 p-1 mb-8 gap-1 backdrop-blur-sm">
             <button
               onClick={() => setActiveTab("artist")}
-              className={`relative rounded-full px-5 py-2 text-sm font-semibold transition-colors duration-300 cursor-pointer ${
+              className={`relative rounded-xl px-5 py-2 text-sm font-semibold transition-colors duration-300 cursor-pointer ${
                 activeTab === "artist" ? "black-text" : "text-black/50 hover:text-black/80"
               }`}
             >
               {activeTab === "artist" && (
                 <motion.span
                   layoutId="activeTabBackground"
-                  className="absolute inset-0 bg-white rounded-full shadow-sm"
+                  className="absolute inset-0 bg-white rounded-xl shadow-sm"
                   transition={{ type: "spring", stiffness: 350, damping: 28 }}
                 />
               )}
@@ -133,14 +133,14 @@ export function HeroSection() {
             </button>
             <button
               onClick={() => setActiveTab("builder")}
-              className={`relative rounded-full px-5 py-2 text-sm font-semibold transition-colors duration-300 cursor-pointer ${
+              className={`relative rounded-xl px-5 py-2 text-sm font-semibold transition-colors duration-300 cursor-pointer ${
                 activeTab === "builder" ? "black-text" : "text-black/50 hover:text-black/80"
               }`}
             >
               {activeTab === "builder" && (
                 <motion.span
                   layoutId="activeTabBackground"
-                  className="absolute inset-0 bg-white rounded-full shadow-sm"
+                  className="absolute inset-0 bg-white rounded-xl shadow-sm"
                   transition={{ type: "spring", stiffness: 350, damping: 28 }}
                 />
               )}
@@ -175,7 +175,7 @@ export function HeroSection() {
 
                 {/* CTA ACTIONS */}
                 <div className="flex flex-wrap items-center gap-4">
-                  <button className="rounded-full primary-bg cursor-pointer px-7 py-3.5 font-semibold transition shadow-md hover:shadow-lg">
+                  <button className="rounded-xl primary-bg cursor-pointer px-7 py-3 font-semibold transition shadow-md hover:shadow-lg">
                     {currentSlide.ctaText}
                   </button>
 
@@ -244,7 +244,7 @@ export function HeroSection() {
                 className="flex flex-col gap-1.5"
               >
                 {[...col2ProductsCenter, ...col2ProductsCenter].map((imgSrc, idx) => (
-                  <div key={idx} className="bg-white rounded-3xl shadow-md border border-neutral-200/50 flex items-center justify-center w-full aspect-square relative overflow-hidden">
+                  <div key={idx} className="bg-white rounded-xl shadow-md border border-neutral-200/50 flex items-center justify-center w-full aspect-square relative overflow-hidden">
                     <Image
                       src={imgSrc}
                       alt="Featured catalog product design template"

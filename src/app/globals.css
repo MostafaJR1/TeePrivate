@@ -6,8 +6,9 @@
 @theme inline {
 --color-background: var(--background);
 --color-foreground: var(--foreground);
---primary-font: var(--font-exo);
+--primary-font: var(--font-space-nunito);
 }
+
 @media (prefers-color-scheme: dark) {
 :root {
 --foreground: #0a0a0a;
@@ -31,6 +32,7 @@ color: #e9204f;
 .primary-bg {
 background-color: #e9204f;
 color: #f3f3f3;
+border: 1px solid #b00d33;
 }
 .primary-bg:hover {
 background-color: #ee2755;
@@ -38,4 +40,16 @@ color: #f3f3f3;
 }
 .primary-border {
 border: 1px solid #e9204f;
+}
+
+
+/* Edge/IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Chrome/WebKit */
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none;
 }

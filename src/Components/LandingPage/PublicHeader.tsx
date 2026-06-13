@@ -12,19 +12,19 @@ import {
   IoChevronDownOutline
 } from "react-icons/io5";
 import { LuMenu } from "react-icons/lu";
-import { Space_Grotesk } from "next/font/google";
 import { AnimatePresence, motion } from "framer-motion";
-import { createClient } from "@/utils/supabase/client"; // Imports your browser helper [1.1.4, 1.1.9]
-import { User } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
+import { ServerUser } from "@/utils/supabase/server-auth";
+import Image from "next/image";
 
-const logoFont = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["700"],
-});
 
 const supabase = createClient();
 
-export function PublicHeader() {
+interface PublicHeaderProps {
+  initialUser: ServerUser | null;
+}
+
+export function PublicHeader({ initialUser }: PublicHeaderProps) {
   const router = useRouter();
   const [isSticky, setIsSticky] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -32,21 +32,24 @@ export function PublicHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Auth & Profile states [1.2.6]
-  const [user, setUser] = useState<User | null>(null);
+  // AUTH STATE: Hydrated by Server, maintained reactively on Client [1.2.6]
+  const [user, setUser] = useState<ServerUser | null>(initialUser);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Listen dynamically to Auth state changes [1.2.6]
+  // Sync client session state (No routing redirects allowed here to prevent loops) [1.1.8, 1.2.6]
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-    };
-    fetchSession();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          storeName: session.user.user_metadata?.store_name,
+          onboardingStatus: session.user.user_metadata?.onboarding_status,
+        });
+      } else {
+        setUser(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -109,13 +112,12 @@ export function PublicHeader() {
     searchInputRef.current?.focus();
   };
 
-  // Safe offset scroller for sidebar links [1]
   const handleScrollToSection = (elementId: string) => {
     setIsSidebarOpen(false);
     setTimeout(() => {
       const element = document.getElementById(elementId);
       if (element) {
-        const headerOffset = 85; // Offsets the height of our fixed sticky header [1]
+        const headerOffset = 85;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
@@ -134,17 +136,16 @@ export function PublicHeader() {
     router.push("/");
   };
 
-  // Extract initials for the avatar capsule
   const getInitials = () => {
     if (!user) return "";
-    const name = user.user_metadata?.store_name || user.email || "";
+    const name = user.storeName || user.email || "";
     return name.substring(0, 2).toUpperCase();
   };
 
   return (
     <>
       {/* 1. STRUCTURAL HEADER CARD */}
-      <div className="fixed top-0 left-0 w-full z-40 flex justify-center pointer-events-none transition-all duration-500">
+      <div className="fixed top-0 left-0 w-full z-40 flex justify-center pointer-events-none transition-all duration-500 pb-4">
         <div
           className={`bg-white/75 backdrop-blur-[2px] flex items-center justify-between gap-4 pointer-events-auto transition-all duration-500 ease-in-out ${
             isSticky
@@ -156,9 +157,8 @@ export function PublicHeader() {
           {/* LEFT: Menu Toggle & Logo */}
           <div className="flex items-center gap-4">
             <div
-              className={`transition-all duration-500 overflow-hidden flex items-center ${
-                isSticky ? "w-0 h-0 opacity-0 pointer-events-none" : "w-10 opacity-100"
-              }`}
+              className="transition-all duration-500 overflow-hidden flex items-center ${
+                w-10 opacity-100"
             >
               <button
                 onClick={() => setIsSidebarOpen(true)}
@@ -171,11 +171,10 @@ export function PublicHeader() {
 
             <Link 
               href="/" 
-              className={`${logoFont.className} transition-all duration-500 font-bold tracking-tight black-text select-none ${
-                isSticky ? "text-lg" : "text-2xl"
-              }`}
+              className="logo-font transition-all duration-500 font-bold tracking-tight black-text select-none text-2xl"
+              style={{ fontSize: isSticky ? "1.125rem" : "1.5rem" }}
             >
-              Tee<span className="primary-text">Private</span>
+              <Image src="/TeeDrop-Logo.png" alt="TeeDrop Logo" width={40} height={40} className="inline-block mr-1 -mt-1" />
             </Link>
 
             {/* Compact Search Button (appears when sticky) [1] */}
@@ -190,25 +189,6 @@ export function PublicHeader() {
                 aria-label="Search"
               >
                 <IoSearchOutline size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* MIDDLE: Search Box Wrapper */}
-          <div
-            className={`flex-1 justify-center transition-all duration-500 ${
-              isSticky ? "w-0 h-0 opacity-0 hidden pointer-events-none" : "hidden md:flex max-w-md"
-            }`}
-          >
-            <div 
-              onClick={() => setIsSearchOpen(true)}
-              className="w-full bg-white/80 backdrop-blur-[1px] hover:bg-white border border-neutral-200 rounded-full overflow-hidden items-center p-1 shadow-sm flex cursor-pointer select-none"
-            >
-              <span className="w-full pl-5 pr-3 py-1.5 text-sm text-neutral-400 font-medium text-left">
-                Search templates, designs, products...
-              </span>
-              <button className="primary-bg cursor-pointer p-2.5 rounded-full flex items-center justify-center">
-                <IoSearchOutline size={16} className="text-white" />
               </button>
             </div>
           </div>
@@ -237,12 +217,12 @@ export function PublicHeader() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.18, ease: "easeOut" }}
-                      className="absolute right-0 mt-3 w-56 bg-white border border-neutral-200/50 rounded-2xl shadow-xl p-2 z-50 flex flex-col gap-1"
+                      className="absolute right-0 mt-3 w-56 bg-white border border-neutral-200/50 rounded-2xl shadow-xl p-2 z-50 flex flex-col gap-1 text-black"
                     >
                       {/* User Header Details */}
                       <div className="px-3.5 py-3 flex flex-col leading-tight border-b border-neutral-100 mb-1">
                         <span className="font-extrabold text-sm text-neutral-800 truncate">
-                          {user.user_metadata?.store_name || "My Store"}
+                          {user.storeName || "My Store"}
                         </span>
                         <span className="text-[10px] font-bold text-neutral-400 truncate mt-0.5">
                           {user.email}
@@ -251,7 +231,7 @@ export function PublicHeader() {
 
                       {/* Dropdown list links */}
                       <Link
-                        href="/dashboard"
+                        href="/u/dashboard"
                         onClick={() => setIsDropdownOpen(false)}
                         className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 rounded-xl transition duration-150"
                       >
@@ -259,7 +239,7 @@ export function PublicHeader() {
                         <span>My Dashboard</span>
                       </Link>
                       <Link
-                        href="/settings"
+                        href="/u/settings"
                         onClick={() => setIsDropdownOpen(false)}
                         className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 rounded-xl transition duration-150"
                       >
@@ -274,7 +254,7 @@ export function PublicHeader() {
                         onClick={handleSignOut}
                         className="flex items-center gap-2.5 w-full text-left px-3.5 py-2.5 text-xs font-bold text-neutral-500 hover:bg-red-50 hover:text-[#e9204f] rounded-xl transition duration-150 cursor-pointer"
                       >
-                        <IoLogOutOutline size={16} className="text-neutral-400 group-hover:text-[#e9204f]" />
+                        <IoLogOutOutline size={16} className="text-neutral-400" />
                         <span>Log Out</span>
                       </button>
                     </motion.div>
@@ -284,6 +264,18 @@ export function PublicHeader() {
             ) : (
               /* ANONYMOUS AUTH BUTTONS */
               <>
+                {/* MIDDLE: Search Box Wrapper */}
+                  <div
+                    className={`flex-1 justify-center transition-all duration-500 ${
+                      isSticky ? "w-0 h-0 opacity-0 hidden pointer-events-none" : "hidden md:flex max-w-md"
+                    }`}
+                  >
+                    <button 
+                      onClick={() => setIsSearchOpen(true)} 
+                        className="p-2 rounded-full text-neutral-600 hover:text-[#e9204f] hover:bg-neutral-100/80 transition duration-150 cursor-pointer flex items-center justify-center">
+                      <IoSearchOutline size={18} />
+                    </button>
+                  </div>
                 <Link href="/auth/login"
                   className={`font-semibold text-neutral-700 hover:text-[#e9204f] transition-all duration-500 cursor-pointer ${
                     isSticky 
@@ -305,7 +297,6 @@ export function PublicHeader() {
               </>
             )}
           </div>
-
         </div>
       </div>
 
@@ -379,7 +370,6 @@ export function PublicHeader() {
       <AnimatePresence>
         {isSidebarOpen && (
           <>
-            {/* Dark blurred background backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -388,7 +378,6 @@ export function PublicHeader() {
               className="fixed inset-0 z-50 bg-[#1b1b1b]/60 backdrop-blur-[1px] pointer-events-auto"
             />
 
-            {/* Sidebar Slide-out Panel */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
@@ -397,12 +386,11 @@ export function PublicHeader() {
               className="fixed inset-y-0 left-0 w-full max-w-[320px] bg-[#1b1b1b] text-white z-50 p-6 flex flex-col justify-between shadow-2xl pointer-events-auto"
             >
               <div>
-                {/* Header (Logo & Close Button) */}
                 <div className="flex items-center justify-between mb-10">
                   <Link 
                     href="/" 
                     onClick={() => setIsSidebarOpen(false)}
-                    className={`${logoFont.className} text-xl font-bold tracking-tight text-white select-none`}
+                    className="logo-font text-xl font-bold tracking-tight text-white select-none"
                   >
                     Tee<span className="primary-text">Private</span>
                   </Link>
@@ -415,7 +403,6 @@ export function PublicHeader() {
                   </button>
                 </div>
 
-                {/* Navigation Links */}
                 <nav className="flex flex-col gap-1">
                   <button
                     onClick={() => setIsSidebarOpen(false)}
@@ -450,7 +437,6 @@ export function PublicHeader() {
                 </nav>
               </div>
 
-              {/* Bottom Auth Controls & Brand Label */}
               <div className="flex flex-col gap-4 mt-8">
                 <div className="h-[1px] bg-white/5 w-full" />
                 <div className="flex flex-col gap-2">
@@ -465,7 +451,6 @@ export function PublicHeader() {
                   TeePrivate Morocco
                 </p>
               </div>
-
             </motion.div>
           </>
         )}
