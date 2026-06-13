@@ -43,7 +43,7 @@ export default function LoginPage() {
     checkLocalSession();
 
     // Dynamically listen to auth transitions on the client [1.2.6]
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       if (session?.user) {
         const status = session.user.user_metadata?.onboarding_status;
         if (status === "completed") {

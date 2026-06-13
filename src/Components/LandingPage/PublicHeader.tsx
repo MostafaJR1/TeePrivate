@@ -39,18 +39,20 @@ export function PublicHeader({ initialUser }: PublicHeaderProps) {
 
   // Sync client session state (No routing redirects allowed here to prevent loops) [1.1.8, 1.2.6]
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          storeName: session.user.user_metadata?.store_name,
-          onboardingStatus: session.user.user_metadata?.onboarding_status,
-        });
-      } else {
-        setUser(null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event: any, session: any) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            storeName: session.user.user_metadata?.store_name,
+            onboardingStatus: session.user.user_metadata?.onboarding_status,
+          });
+        } else {
+          setUser(null);
+        }
       }
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, []);

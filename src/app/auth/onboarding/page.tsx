@@ -54,7 +54,7 @@ export default function OnboardingPage() {
     checkLocalSession();
 
     // Listen to Auth state events locally [1.2.6]
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       if (session?.user) {
         setUserId(session.user.id);
         const status = session.user.user_metadata?.onboarding_status;
