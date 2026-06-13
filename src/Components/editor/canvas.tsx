@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useCallback, useRef, useState, useEffect } from "react"
-import { Maximize2, Minus, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { DesignElement } from "@/lib/editor-types"
 import { createClient } from "@/utils/supabase/client"
@@ -361,37 +360,6 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
 
         <div className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-white/5 bg-[#0a0a0a]/40 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500 backdrop-blur-xl">
           Drag to move · Handles to resize · Rotation handle above
-        </div>
-
-        <div className="absolute bottom-6 right-6 z-30 flex items-center gap-2 rounded-2xl border border-white/5 bg-[#0a0a0a]/40 px-2 py-2 backdrop-blur-xl">
-          <button
-            onClick={() => setZoom((z) => Math.max(0.25, +(z - 0.1).toFixed(2)))}
-            className="flex size-9 items-center justify-center rounded-lg text-neutral-400 transition-all hover:bg-white/10 hover:text-white active:scale-95"
-            aria-label="Zoom out"
-          >
-            <Minus className="size-4" />
-          </button>
-          <button
-            onClick={() => setZoom(1)}
-            className="min-w-14 rounded-lg px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400 transition-all hover:bg-white/10 hover:text-white cursor-pointer"
-          >
-            {Math.round(zoom * 100)}%
-          </button>
-          <button
-            onClick={() => setZoom((z) => Math.min(2.5, +(z + 0.1).toFixed(2)))}
-            className="flex size-9 items-center justify-center rounded-lg text-neutral-400 transition-all hover:bg-white/10 hover:text-white active:scale-95"
-            aria-label="Zoom in"
-          >
-            <Plus className="size-4" />
-          </button>
-          <div className="mx-1.5 h-6 w-px bg-white/5" />
-          <button
-            onClick={() => setZoom(1)}
-            className="flex size-9 items-center justify-center rounded-lg text-neutral-400 transition-all hover:bg-white/10 hover:text-white active:scale-95"
-            aria-label="Fit to screen"
-          >
-            <Maximize2 className="size-4" />
-          </button>
         </div>
       </div>
 

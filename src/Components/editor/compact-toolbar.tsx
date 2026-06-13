@@ -1,14 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
 import {
   ImageIcon,
   MousePointer2,
   Move,
   Shapes,
   Type,
-  ZoomIn,
-  ZoomOut,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -32,14 +29,11 @@ const TOOLS: Tool[] = [
 interface CompactToolbarProps {
   activeTool: ToolId
   onToolChange: (tool: ToolId) => void
-  onZoom?: (direction: 'in' | 'out') => void
 }
 
-export function CompactToolbar({ activeTool, onToolChange, onZoom }: CompactToolbarProps) {
-  const [hoveredTool, setHoveredTool] = useState<ToolId | null>(null)
-
+export function CompactToolbar({ activeTool, onToolChange }: CompactToolbarProps) {
   return (
-    <div className="absolute left-6 bottom-6 z-30 flex flex-col gap-3 rounded-xl border border-white/10 bg-[#0a0a0a]/60 p-2 backdrop-blur-xl">
+    <div className="absolute left-6 bottom-6 z-30 rounded-xl border border-white/10 bg-[#0a0a0a]/60 p-2 backdrop-blur-xl">
       {/* Main tools */}
       <div className="flex items-center gap-2">
         {TOOLS.map((tool) => {
@@ -68,33 +62,6 @@ export function CompactToolbar({ activeTool, onToolChange, onZoom }: CompactTool
             </button>
           )
         })}
-      </div>
-
-      {/* Zoom controls */}
-      <div className="h-px bg-white/5" />
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => onZoom?.('out')}
-          title="Zoom Out (Ctrl + -)"
-          className="group relative p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all duration-200"
-        >
-          <ZoomOut className="size-5" />
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
-            Zoom Out
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onZoom?.('in')}
-          title="Zoom In (Ctrl + +)"
-          className="group relative p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all duration-200"
-        >
-          <ZoomIn className="size-5" />
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
-            Zoom In
-          </span>
-        </button>
       </div>
     </div>
   )
