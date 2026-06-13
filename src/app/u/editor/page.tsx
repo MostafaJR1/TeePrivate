@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useState, useEffect, useRef } from "react"
 import type { DesignElement, ToolId } from "@/lib/editor-types"
 import { exportMockup } from "@/lib/export-mockup"
 import { TopBar } from "@/Components/editor/top-bar"
@@ -49,40 +49,72 @@ export default function EditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>("el-1")
   const [projectName, setProjectName] = useState("Summer Tee Campaign")
   const [exporting, setExporting] = useState(false)
+  const [mockupOpacity, setMockupOpacity] = useState(1)
   
-  // Undo/Redo state
+  // Undo/Redo state with debounced history tracking
   const [history, setHistory] = useState<DesignElement[][]>([INITIAL_ELEMENTS])
   const [historyIndex, setHistoryIndex] = useState(0)
+  const historyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastHistoryStateRef = useRef<DesignElement[]>(INITIAL_ELEMENTS)
 
-  // Push state to history
+  // Push state to history with debouncing to avoid tracking every micro-movement
   const pushHistory = useCallback((newElements: DesignElement[]) => {
-    setHistory((prev) => {
-      const newHistory = prev.slice(0, historyIndex + 1)
-      newHistory.push(newElements)
-      return newHistory
-    })
-    setHistoryIndex((prev) => prev + 1)
+    lastHistoryStateRef.current = newElements
+
+    // Clear existing timeout
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current)
+    }
+
+    // Debounce: wait 500ms after last change before committing to history
+    historyTimeoutRef.current = setTimeout(() => {
+      setHistory((prev) => {
+        const newHistory = prev.slice(0, historyIndex + 1)
+        newHistory.push(lastHistoryStateRef.current)
+        return newHistory
+      })
+      setHistoryIndex((prev) => prev + 1)
+    }, 500)
   }, [historyIndex])
 
   // Undo
   const handleUndo = useCallback(() => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1
-      setHistoryIndex(newIndex)
+    // Flush any pending history changes
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current)
+      setHistory((prev) => {
+        const newHistory = prev.slice(0, historyIndex + 1)
+        if (JSON.stringify(newHistory[newHistory.length - 1]) !== JSON.stringify(lastHistoryStateRef.current)) {
+          newHistory.push(lastHistoryStateRef.current)
+          setHistoryIndex((prev) => prev + 1)
+          return newHistory
+        }
+        return prev
+      })
+    }
+
+    setHistoryIndex((prevIndex) => {
+      const newIndex = Math.max(0, prevIndex - 1)
       setElements(history[newIndex])
       setSelectedId(null)
-    }
-  }, [historyIndex, history])
+      return newIndex
+    })
+  }, [history, historyIndex])
 
   // Redo
   const handleRedo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1
-      setHistoryIndex(newIndex)
+    // Flush any pending history changes first
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current)
+    }
+
+    setHistoryIndex((prevIndex) => {
+      const newIndex = Math.min(history.length - 1, prevIndex + 1)
       setElements(history[newIndex])
       setSelectedId(null)
-    }
-  }, [historyIndex, history])
+      return newIndex
+    })
+  }, [history])
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -98,6 +130,15 @@ export default function EditorPage() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleUndo, handleRedo])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (historyTimeoutRef.current) {
+        clearTimeout(historyTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleExport = useCallback(async () => {
     setExporting(true)
@@ -121,13 +162,24 @@ export default function EditorPage() {
   )
 
   const deleteElement = useCallback((id: string) => {
+    // Flush any pending history
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current)
+    }
+
     setElements((prev) => {
       const updated = prev.filter((el) => el.id !== id)
-      pushHistory(updated)
+      // Delete operations are immediately added to history (no debounce)
+      setHistory((prevHistory) => {
+        const newHistory = prevHistory.slice(0, historyIndex + 1)
+        newHistory.push(updated)
+        setHistoryIndex((prevIdx) => prevIdx + 1)
+        return newHistory
+      })
       return updated
     })
     setSelectedId(null)
-  }, [pushHistory])
+  }, [historyIndex])
 
   const handleToolChange = useCallback((tool: ToolId) => {
     setActiveTool(tool)
@@ -188,6 +240,7 @@ export default function EditorPage() {
           onUpdate={updateElement}
           onDelete={deleteElement}
           activeTool={activeTool}
+          mockupOpacity={mockupOpacity}
           onAddElement={(el) => {
             setElements((prev) => {
               const updated = [...prev, el]
@@ -202,6 +255,8 @@ export default function EditorPage() {
           element={selected}
           onUpdate={updateElement}
           onDelete={deleteElement}
+          mockupOpacity={mockupOpacity}
+          onMockupOpacityChange={setMockupOpacity}
         />
       </div>
     </main>

@@ -21,12 +21,14 @@ interface PropertiesPanelProps {
   element: DesignElement | null
   onUpdate: (id: string, patch: Partial<DesignElement>) => void
   onDelete: (id: string) => void
+  mockupOpacity?: number
+  onMockupOpacityChange?: (opacity: number) => void
 }
 
 // Accent Swatches aligned to your primary brand colors
 const SWATCHES = ["#e9204f", "#ffffff", "#1b1b1b", "#f5b700", "#1e90ff", "#2dd4bf"]
 
-export function PropertiesPanel({ element, onUpdate, onDelete }: PropertiesPanelProps) {
+export function PropertiesPanel({ element, onUpdate, onDelete, mockupOpacity = 1, onMockupOpacityChange }: PropertiesPanelProps) {
   return (
     <aside className="z-20 flex w-80 shrink-0 flex-col border-l border-white/5 bg-[#0a0a0a]/50 backdrop-blur-xl text-white select-none">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/5 px-6 bg-[#131315]/30">
@@ -213,6 +215,26 @@ export function PropertiesPanel({ element, onUpdate, onDelete }: PropertiesPanel
           </div>
         </div>
       )}
+
+      {/* Mockup Blend Settings - Always visible */}
+      <div className="border-t border-white/5 bg-white/[0.02] p-4 mt-auto">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider flex-1">
+            Mockup Blend
+          </span>
+        </div>
+        <SliderField
+          label="Mockup Opacity"
+          min={0}
+          max={100}
+          value={Math.round(mockupOpacity * 100)}
+          suffix="%"
+          onChange={(v) => onMockupOpacityChange?.(v / 100)}
+        />
+        <p className="text-[11px] text-neutral-500 mt-2">
+          Adjust mockup visibility to blend with your design
+        </p>
+      </div>
     </aside>
   )
 }
