@@ -4,7 +4,7 @@ import { useCallback, useState } from "react"
 import type { DesignElement, ToolId } from "@/lib/editor-types"
 import { exportMockup } from "@/lib/export-mockup"
 import { TopBar } from "@/Components/editor/top-bar"
-import { ToolsSidebar } from "@/Components/editor/tools-sidebar"
+import { CompactToolbar } from "@/Components/editor/compact-toolbar"
 import { Canvas } from "@/Components/editor/canvas"
 import { PropertiesPanel } from "@/Components/editor/properties-panel"
 
@@ -141,8 +141,8 @@ export default function EditorPage() {
         onExport={handleExport}
         exporting={exporting}
       />
-      <div className="flex min-h-0 flex-1">
-        <ToolsSidebar activeTool={activeTool} onToolChange={handleToolChange} />
+      <div className="flex min-h-0 flex-1 relative">
+        <CompactToolbar activeTool={activeTool} onToolChange={handleToolChange} />
         <Canvas
           elements={elements}
           selectedId={selectedId}
