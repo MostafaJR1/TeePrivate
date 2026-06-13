@@ -7,7 +7,7 @@ const MOCKUP_SRC = "/tshirt-mockup.png"
 // Print area boundaries (must match canvas PRINT_AREA)
 const PRINT_AREA = {
   x: 120,
-  y: 140,
+  y: 155,
   width: 200,
   height: 210,
 }
@@ -29,14 +29,17 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function exportMockup(
   elements: DesignElement[],
   fileName = "mockup",
-  scale = 2,
+  scale = 3, // Increased from 2 to 3 for better quality
 ): Promise<void> {
   const canvas = document.createElement("canvas")
   canvas.width = FRAME_WIDTH * scale
   canvas.height = FRAME_HEIGHT * scale
-  const ctx = canvas.getContext("2d")
+  const ctx = canvas.getContext("2d", { alpha: false })
   if (!ctx) return
 
+  // Enable high-quality rendering
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = "high"
   ctx.scale(scale, scale)
 
   // Background matches the editor frame surface (#1b1b1b)
@@ -76,7 +79,7 @@ export async function exportMockup(
     ctx.save()
     ctx.globalAlpha = el.opacity
 
-    // Rotate around the element center
+    // Rotate around the element center for accurate rotation
     const cx = el.x + el.width / 2
     const cy = el.y + el.height / 2
     ctx.translate(cx, cy)
@@ -117,6 +120,8 @@ export async function exportMockup(
     } else if (el.type === "line") {
       ctx.strokeStyle = el.color
       ctx.lineWidth = 2
+      ctx.lineCap = "round"
+      ctx.lineJoin = "round"
       ctx.beginPath()
       ctx.moveTo(el.x, el.y + el.height / 2)
       ctx.lineTo(el.x + el.width, el.y + el.height / 2)
@@ -124,7 +129,7 @@ export async function exportMockup(
     } else if (el.type === "image" && el.src) {
       const img = imageCache.get(el.src)
       if (img) {
-        // object-contain behavior
+        // object-contain behavior with high-quality scaling
         const ratio = Math.min(el.width / img.width, el.height / img.height)
         const drawW = img.width * ratio
         const drawH = img.height * ratio
