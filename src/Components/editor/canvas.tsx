@@ -32,6 +32,7 @@ interface CanvasProps {
   onDelete: (id: string) => void
   activeTool?: string
   onAddElement?: (el: DesignElement) => void
+  mockupOpacity?: number
 }
 
 type DragState =
@@ -51,7 +52,7 @@ type DragState =
 
 const HANDLES = ["nw", "ne", "sw", "se"] as const
 
-export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, activeTool, onAddElement }: CanvasProps) {
+export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, activeTool, onAddElement, mockupOpacity = 1 }: CanvasProps) {
   const [zoom, setZoom] = useState(1)
   const dragRef = useRef<DragState>(null)
   const frameRef = useRef<HTMLDivElement>(null)
@@ -267,7 +268,8 @@ export function Canvas({ elements, selectedId, onSelect, onUpdate, onDelete, act
             <img
               src="/tshirt-mockup.png"
               alt="Blank t-shirt product mockup base"
-              className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-cover opacity-95"
+              className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl object-cover"
+              style={{ opacity: Math.max(0.2, mockupOpacity * 0.95) }}
               crossOrigin="anonymous"
             />
 
