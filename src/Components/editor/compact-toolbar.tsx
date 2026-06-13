@@ -1,12 +1,14 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import {
   ImageIcon,
   MousePointer2,
   Move,
   Shapes,
-  Sparkles,
   Type,
+  ZoomIn,
+  ZoomOut,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -25,43 +27,75 @@ const TOOLS: Tool[] = [
   { id: "text", label: "Text", icon: Type, shortcut: "T" },
   { id: "shapes", label: "Shapes", icon: Shapes, shortcut: "S" },
   { id: "image", label: "Image", icon: ImageIcon, shortcut: "I" },
-  { id: "ai", label: "AI Generate", icon: Sparkles, shortcut: "A" },
 ]
 
 interface CompactToolbarProps {
   activeTool: ToolId
   onToolChange: (tool: ToolId) => void
+  onZoom?: (direction: 'in' | 'out') => void
 }
 
-export function CompactToolbar({ activeTool, onToolChange }: CompactToolbarProps) {
+export function CompactToolbar({ activeTool, onToolChange, onZoom }: CompactToolbarProps) {
+  const [hoveredTool, setHoveredTool] = useState<ToolId | null>(null)
+
   return (
-    <div className="absolute left-6 bottom-6 z-30 flex items-center gap-2 rounded-xl border border-white/10 bg-[#0a0a0a]/60 p-2 backdrop-blur-xl">
-      {TOOLS.map((tool) => {
-        const Icon = tool.icon
-        const isActive = activeTool === tool.id
-        
-        return (
-          <button
-            key={tool.id}
-            onClick={() => onToolChange(tool.id)}
-            title={`${tool.label} (${tool.shortcut})`}
-            className={cn(
-              "group relative p-2 rounded-lg transition-all duration-200",
-              isActive
-                ? "bg-[#e9204f] text-white shadow-lg shadow-[#e9204f]/50"
-                : "text-neutral-400 hover:text-white hover:bg-white/10",
-            )}
-          >
-            <Icon className={cn(
-              "size-5",
-              isActive && "drop-shadow-[0_0_8px_rgba(233,32,79,0.4)]"
-            )} />
-            <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
-              {tool.label}
-            </span>
-          </button>
-        )
-      })}
+    <div className="absolute left-6 bottom-6 z-30 flex flex-col gap-3 rounded-xl border border-white/10 bg-[#0a0a0a]/60 p-2 backdrop-blur-xl">
+      {/* Main tools */}
+      <div className="flex items-center gap-2">
+        {TOOLS.map((tool) => {
+          const Icon = tool.icon
+          const isActive = activeTool === tool.id
+          
+          return (
+            <button
+              key={tool.id}
+              onClick={() => onToolChange(tool.id)}
+              title={`${tool.label} (${tool.shortcut})`}
+              className={cn(
+                "group relative p-2 rounded-lg transition-all duration-200",
+                isActive
+                  ? "bg-[#e9204f] text-white shadow-lg shadow-[#e9204f]/50"
+                  : "text-neutral-400 hover:text-white hover:bg-white/10",
+              )}
+            >
+              <Icon className={cn(
+                "size-5",
+                isActive && "drop-shadow-[0_0_8px_rgba(233,32,79,0.4)]"
+              )} />
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
+                {tool.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Zoom controls */}
+      <div className="h-px bg-white/5" />
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onZoom?.('out')}
+          title="Zoom Out (Ctrl + -)"
+          className="group relative p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+        >
+          <ZoomOut className="size-5" />
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
+            Zoom Out
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onZoom?.('in')}
+          title="Zoom In (Ctrl + +)"
+          className="group relative p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+        >
+          <ZoomIn className="size-5" />
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1c1c1e] px-2 py-1 text-xs font-medium text-white opacity-0 pointer-events-none transition-opacity group-hover:opacity-100">
+            Zoom In
+          </span>
+        </button>
+      </div>
     </div>
   )
 }

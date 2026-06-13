@@ -1,13 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Download, Loader2, Pencil } from "lucide-react"
+import { Download, Loader2, Pencil, RotateCcw, RotateCw } from "lucide-react"
 
 interface TopBarProps {
   projectName: string
   onProjectNameChange: (name: string) => void
   onExport: () => void
   exporting: boolean
+  onUndo?: () => void
+  onRedo?: () => void
+  canUndo?: boolean
+  canRedo?: boolean
 }
 
 export function TopBar({
@@ -15,6 +19,10 @@ export function TopBar({
   onProjectNameChange,
   onExport,
   exporting,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
 }: TopBarProps) {
   const [editing, setEditing] = useState(false)
 
@@ -47,8 +55,27 @@ export function TopBar({
         </div>
       </div>
 
-      {/* Actions - minimal */}
+      {/* Actions - undo/redo and export */}
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="Undo (Ctrl+Z)"
+          className="inline-flex h-9 items-center justify-center rounded-lg px-2 text-neutral-300 transition-all hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <RotateCcw className="size-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="Redo (Ctrl+Y)"
+          className="inline-flex h-9 items-center justify-center rounded-lg px-2 text-neutral-300 transition-all hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        >
+          <RotateCw className="size-4" />
+        </button>
+        <div className="w-px h-6 bg-white/10" />
         <button
           type="button"
           onClick={onExport}

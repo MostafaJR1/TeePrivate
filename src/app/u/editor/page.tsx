@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import type { DesignElement, ToolId } from "@/lib/editor-types"
 import { exportMockup } from "@/lib/export-mockup"
 import { TopBar } from "@/Components/editor/top-bar"
@@ -49,6 +49,55 @@ export default function EditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>("el-1")
   const [projectName, setProjectName] = useState("Summer Tee Campaign")
   const [exporting, setExporting] = useState(false)
+  
+  // Undo/Redo state
+  const [history, setHistory] = useState<DesignElement[][]>([INITIAL_ELEMENTS])
+  const [historyIndex, setHistoryIndex] = useState(0)
+
+  // Push state to history
+  const pushHistory = useCallback((newElements: DesignElement[]) => {
+    setHistory((prev) => {
+      const newHistory = prev.slice(0, historyIndex + 1)
+      newHistory.push(newElements)
+      return newHistory
+    })
+    setHistoryIndex((prev) => prev + 1)
+  }, [historyIndex])
+
+  // Undo
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1
+      setHistoryIndex(newIndex)
+      setElements(history[newIndex])
+      setSelectedId(null)
+    }
+  }, [historyIndex, history])
+
+  // Redo
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1
+      setHistoryIndex(newIndex)
+      setElements(history[newIndex])
+      setSelectedId(null)
+    }
+  }, [historyIndex, history])
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"))) {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [handleUndo, handleRedo])
 
   const handleExport = useCallback(async () => {
     setExporting(true)
@@ -62,17 +111,23 @@ export default function EditorPage() {
 
   const updateElement = useCallback(
     (id: string, patch: Partial<DesignElement>) => {
-      setElements((prev) =>
-        prev.map((el) => (el.id === id ? { ...el, ...patch } : el)),
-      )
+      setElements((prev) => {
+        const updated = prev.map((el) => (el.id === id ? { ...el, ...patch } : el))
+        pushHistory(updated)
+        return updated
+      })
     },
-    [],
+    [pushHistory],
   )
 
   const deleteElement = useCallback((id: string) => {
-    setElements((prev) => prev.filter((el) => el.id !== id))
+    setElements((prev) => {
+      const updated = prev.filter((el) => el.id !== id)
+      pushHistory(updated)
+      return updated
+    })
     setSelectedId(null)
-  }, [])
+  }, [pushHistory])
 
   const handleToolChange = useCallback((tool: ToolId) => {
     setActiveTool(tool)
@@ -95,41 +150,20 @@ export default function EditorPage() {
         fontSize: 24,
         fontWeight: 600,
       }
-      setElements((prev) => [...prev, el])
+      setElements((prev) => {
+        const updated = [...prev, el]
+        pushHistory(updated)
+        return updated
+      })
       setSelectedId(el.id)
     } else if (tool === "shapes") {
-      const el: DesignElement = {
-        id: nextId(),
-        type: "rect",
-        name: "Rectangle",
-        x: 150,
-        y: 230,
-        width: 140,
-        height: 140,
-        rotation: 0,
-        opacity: 1,
-        color: "#e9204f",
-      }
-      setElements((prev) => [...prev, el])
-      setSelectedId(el.id)
-    } else if (tool === "image" || tool === "ai") {
-      const el: DesignElement = {
-        id: nextId(),
-        type: "image",
-        name: tool === "ai" ? "AI Graphic" : "Uploaded Image",
-        x: 130,
-        y: 200,
-        width: 180,
-        height: 150,
-        rotation: 0,
-        opacity: 1,
-        color: "#e9204f",
-        src: "/sample-graphic.png",
-      }
-      setElements((prev) => [...prev, el])
-      setSelectedId(el.id)
+      // Shapes tool will now open a menu in the Canvas component
+      setActiveTool("shapes")
+    } else if (tool === "image") {
+      // Image tool will now open a menu in the Canvas component
+      setActiveTool("image")
     }
-  }, [])
+  }, [pushHistory])
 
   const selected = elements.find((el) => el.id === selectedId) ?? null
 
@@ -140,6 +174,10 @@ export default function EditorPage() {
         onProjectNameChange={setProjectName}
         onExport={handleExport}
         exporting={exporting}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={historyIndex > 0}
+        canRedo={historyIndex < history.length - 1}
       />
       <div className="flex min-h-0 flex-1 relative">
         <CompactToolbar activeTool={activeTool} onToolChange={handleToolChange} />
@@ -149,6 +187,16 @@ export default function EditorPage() {
           onSelect={setSelectedId}
           onUpdate={updateElement}
           onDelete={deleteElement}
+          activeTool={activeTool}
+          onAddElement={(el) => {
+            setElements((prev) => {
+              const updated = [...prev, el]
+              pushHistory(updated)
+              return updated
+            })
+            setSelectedId(el.id)
+            setActiveTool("select")
+          }}
         />
         <PropertiesPanel
           element={selected}
